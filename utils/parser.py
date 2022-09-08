@@ -1,16 +1,15 @@
 import re
 
 
-def try_int(string):
-    try:
-        return int(string)
-    except ValueError:
-        return string
-
-
 def parse(source: str) -> dict:
     operator = {}
     source = source[:source.index('==干员档案==')]
+
+    def try_int(string):
+        try:
+            return int(string)
+        except ValueError:
+            return string
 
     def parse_section(section: str) -> None:
         operator[f'{section}'] = {}
@@ -30,7 +29,7 @@ def parse(source: str) -> dict:
         attrs = ('技能名', '技能类型1', '技能类型2')
         for attr in attrs:
             try:
-                operator[skill][tag] = re.search(rf'\|{attr}=(.*)\n', text).group(1)
+                operator[skill][attr] = re.search(rf'\|{attr}=(.*)\n', text).group(1)
             except AttributeError:
                 continue
         for level in '1234567':
@@ -97,7 +96,7 @@ def parse(source: str) -> dict:
 
     operator['技能升级材料'] = {}
 
-    def rank_materials(levels):
+    def parse_rank(levels):
         for level in levels:
             operator['技能升级材料'][level] = {}
             items = re.search(rf'\|{level}=(.*)\n', source).group(1).split()
@@ -106,12 +105,11 @@ def parse(source: str) -> dict:
                 v = item.split('|')[2].rstrip('}')
                 operator['技能升级材料'][level][k] = try_int(v)
 
-    rank_materials('234567')
+    parse_rank('234567')
     if rarity in '345':
-        keys = ('一8', '一9', '一10', '二8', '二9', '二10')
-        rank_materials(keys)
+        parse_rank(('一8', '一9', '一10', '二8', '二9', '二10'))
     if rarity == '5':
-        rank_materials(('三8', '三9', '三10'))
+        parse_rank(('三8', '三9', '三10'))
 
     operator['精英化材料'] = {}
 

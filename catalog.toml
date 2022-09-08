@@ -1,0 +1,347 @@
+["近卫"."剑豪"]
+"柏喙" = "Bibeak"
+"战车" = "Tachanka"
+"艾丽妮" = "Irene"
+"陈" = "Ch'en"
+"刻刀" = "Cutter"
+
+["近卫"."强攻手"]
+"布洛卡" = "Broca"
+"艾丝黛尔" = "Estelle"
+"暴行" = "Savage"
+"泡普卡" = "Popukar"
+"幽灵鲨" = "Specter"
+"煌" = "Blaze"
+
+["近卫"."无畏者"]
+"芙兰卡" = "Franka"
+"斯卡蒂" = "Skadi"
+"耀骑士临光" = "Nearl_the_Radiant_Knight"
+"炎客" = "Flamebringer"
+"玫兰莎" = "Melantha"
+"断罪者" = "Conviction"
+Castle-3 = "Castle-3"
+"缠丸" = "Matoimaru"
+
+["近卫"."领主"]
+"拉普兰德" = "Lappland"
+"银灰" = "SilverAsh"
+"断崖" = "Ayerscarpe"
+"月见夜" = "Midnight"
+"芳汀" = "Arene"
+"霜叶" = "Frostleaf"
+"棘刺" = "Thorns"
+
+["近卫"."斗士"]
+"杰克" = "Jackie"
+"因陀罗" = "Indra"
+"山" = "Mountain"
+"燧石" = "Flint"
+"猎蜂" = "Beehunter"
+
+["近卫"."教官"]
+"鞭刃" = "Whislash"
+"杜宾" = "Dobermann"
+"帕拉斯" = "Pallas"
+"诗怀雅" = "Swire"
+
+["近卫"."收割者"]
+"羽毛笔" = "La_Pluma"
+
+["近卫"."武者"]
+"赫拉格" = "Hellagur"
+"赤冬" = "Akafuyu"
+"宴" = "Utage"
+
+["近卫"."术战者"]
+"星极" = "Astesia"
+"铸铁" = "Sideroca"
+"慕斯" = "Mousse"
+"史尔特尔" = "Surtr"
+
+["近卫"."解放者"]
+"龙舌兰" = "Tequila"
+
+["医疗"."疗养师"]
+"清流" = "Purestream"
+"流明" = "Lumen"
+"絮雨" = "Whisperain"
+"锡兰" = "Ceylon"
+
+["医疗"."行医"]
+"蜜莓" = "Honeyberry"
+"桑葚" = "Mulberry"
+"褐果" = "Chestnut"
+
+["医疗"."医师"]
+"图耶" = "Tuye"
+"芙蓉" = "Hibiscus"
+"亚叶" = "Folinic"
+"闪灵" = "Shining"
+"苏苏洛" = "Sussurro"
+"嘉维尔" = "Gavial"
+"安赛尔" = "Ansel"
+"华法琳" = "Warfarin"
+"赫默" = "Silence"
+"末药" = "Myrrh"
+"凯尔希" = "Kal'tsit"
+Lancet-2 = "Lancet-2"
+
+["医疗"."群愈师"]
+"微风" = "Breeze"
+"白面鸮" = "Ptilopsis"
+"调香师" = "Perfumer"
+"夜莺" = "Nightingale"
+
+["医疗"."咒愈师"]
+"濯尘芙蓉" = "Hibiscus_the_Purifier"
+
+["先锋"."尖兵"]
+"嵯峨" = "Saga"
+"夜刀" = "Yato"
+"贾维" = "Chiave"
+"清道夫" = "Scavenger"
+"推进之王" = "Siege"
+"香草" = "Vanilla"
+"讯使" = "Courier"
+"焰尾" = "Flametail"
+"德克萨斯" = "Texas"
+"凛冬" = "Зима"
+"芬" = "Fang"
+
+["先锋"."战术家"]
+"夜半" = "Blacknight"
+"豆苗" = "Beanstalk"
+
+["先锋"."执旗手"]
+"极境" = "Elysium"
+"桃金娘" = "Myrtle"
+"琴柳" = "Saileach"
+
+["先锋"."冲锋手"]
+"风笛" = "Bagpipe"
+"野鬃" = "Wild_Mane"
+"翎羽" = "Plume"
+"苇草" = "Reed"
+"格拉尼" = "Grani"
+"红豆" = "Vigna"
+
+["术师"."轰击术师"]
+"蚀清" = "Corroserum"
+"伊芙利特" = "Ifrit"
+
+["术师"."中坚术师"]
+"艾雅法拉" = "Eyjafjalla"
+"刻俄柏" = "Ceobe"
+"史都华德" = "Steward"
+"杜林" = "Durin"
+"特米米" = "Tomimi"
+"夜魔" = "Nightmare"
+"阿米娅" = "Amiya"
+"夜烟" = "Haze"
+"苦艾" = "Absinthe"
+
+["术师"."阵法术师"]
+"薄绿" = "Mint"
+"卡涅利安" = "Carnelian"
+"蜜蜡" = "Beeswax"
+
+["术师"."秘术师"]
+"黑键" = "Ebenholz"
+"爱丽丝" = "Iris"
+"深靛" = "Indigo"
+
+["术师"."扩散术师"]
+"莱恩哈特" = "Leonhardt"
+"莫斯提马" = "Mostima"
+12F = "12F"
+"格雷伊" = "Greyy"
+"夕" = "Dusk"
+"天火" = "Skyfire"
+"炎熔" = "Lava"
+"远山" = "Gitano"
+"炎狱炎熔" = "Lava_the_Purgatory"
+
+["术师"."链术师"]
+"异客" = "Passenger"
+"布丁" = "Pudding"
+"星源" = "Astgenne"
+"惊蛰" = "Leizi"
+
+["术师"."驭械术师"]
+"卡达" = "Click"
+"耶拉" = "Kjera"
+"澄闪" = "Goldenglow"
+"洛洛" = "Rockrock"
+
+["狙击"."神射手"]
+"安哲拉" = "Andreana"
+"守林人" = "Firewatch"
+"安比尔" = "Ambriel"
+"远牙" = "Fartooth"
+
+["狙击"."速射手"]
+"流星" = "Meteor"
+"梅" = "May"
+"灰喉" = "GreyThroat"
+"正义骑士号" = "\"Justice_Knight\""
+"杰西卡" = "Jessica"
+"四月" = "April"
+"红云" = "Vermeil"
+"空弦" = "Archetto"
+"巡林者" = "Rangers"
+"蓝毒" = "Blue_Poison"
+"白金" = "Platinum"
+"灰烬" = "Ash"
+"能天使" = "Exusiai"
+"安德切尔" = "Adnachiel"
+"克洛丝" = "Kroos"
+"寒芒克洛丝" = "Kroos_the_Keen_Glint"
+
+["狙击"."重射手"]
+"酸糖" = "Aciddrop"
+"普罗旺斯" = "Provence"
+"黑" = "Schwarz"
+
+["狙击"."散射手"]
+"奥斯塔" = "Aosta"
+"送葬人" = "Executor"
+"假日威龙陈" = "Ch'en_the_Holungday"
+"松果" = "Pinecone"
+
+["狙击"."攻城手"]
+"熔泉" = "Toddifons"
+"早露" = "Роса"
+"埃拉托" = "Erato"
+
+["狙击"."炮手"]
+"菲亚梅塔" = "Fiammetta"
+"白雪" = "ShiraYuki"
+"慑砂" = "Sesa"
+"陨星" = "Meteorite"
+"空爆" = "Catapult"
+W = "W"
+
+["狙击"."投掷手"]
+"迷迭香" = "Rosmontis"
+"承曦格雷伊" = "Greyy_the_Lightningbearer"
+
+["重装"."铁卫"]
+"泡泡" = "Bubble"
+"星熊" = "Hoshiguma"
+"暴雨" = "Heavyrain"
+"雷蛇" = "Liskarm"
+"黑角" = "Noir_Corne"
+"可颂" = "Croissant"
+"卡缇" = "Cardigan"
+"角峰" = "Matterhorn"
+"蛇屠箱" = "Cuora"
+"拜松" = "Bison"
+"米格鲁" = "Beagle"
+"闪击" = "Blitz"
+"年" = "Nian"
+
+["重装"."决战者"]
+"森蚺" = "Eunectes"
+"极光" = "Aurora"
+
+["重装"."驭法铁卫"]
+"坚雷" = "Dur-nar"
+"暮落" = "Shalem"
+"车尔尼" = "Czerny"
+"石棉" = "Asbestos"
+
+["重装"."守护者"]
+"瑕光" = "Blemishine"
+"古米" = "Гум"
+"斑点" = "Spot"
+"吽" = "Hung"
+"临光" = "Nearl"
+"塞雷娅" = "Saria"
+
+["重装"."要塞"]
+"灰毫" = "Ashlock"
+"号角" = "Horn"
+
+["重装"."不屈者"]
+"泥岩" = "Mudrock"
+"火神" = "Vulcan"
+
+["特种"."推击手"]
+"温蒂" = "Weedy"
+"食铁兽" = "FEater"
+"见行者" = "Enforcer"
+"阿消" = "Shaw"
+
+["特种"."处决者"]
+"卡夫卡" = "Kafka"
+THRM-EX = "Thermal-EX"
+"傀影" = "Phantom"
+"槐琥" = "Waai_Fu"
+"红" = "Projekt_Red"
+"砾" = "Gravel"
+
+["特种"."傀儡师"]
+"归溟幽灵鲨" = "Specter_the_Unchained"
+"贝娜" = "Bena"
+"风丸" = "Kazemaru"
+
+["特种"."陷阱师"]
+"霜华" = "Frost"
+"多萝西" = "Dorothy"
+"罗宾" = "Robin"
+
+["特种"."钩索师"]
+"雪雉" = "Snowsant"
+"崖心" = "Cliffheart"
+"暗索" = "Rope"
+"歌蕾蒂娅" = "Gladiia"
+
+["特种"."伏击客"]
+"狮蝎" = "Manticore"
+"绮良" = "Kirara"
+"伊桑" = "Ethan"
+"水月" = "Mizuki"
+
+["特种"."怪杰"]
+"阿" = "Aak"
+
+["特种"."行商"]
+"乌有" = "Mr.Nothing"
+"孑" = "Jaye"
+"老鲤" = "Lee"
+
+["辅助"."凝滞师"]
+"梓兰" = "Orchid"
+"地灵" = "Earthspirit"
+"安洁莉娜" = "Angelina"
+"格劳克斯" = "Glaucus"
+"波登可" = "Podenco"
+"真理" = "Истина"
+"铃兰" = "Suzuran"
+
+["辅助"."召唤师"]
+"深海色" = "Deepcolor"
+"令" = "Ling"
+"麦哲伦" = "Magallan"
+"稀音" = "Scene"
+"梅尔" = "Mayer"
+
+["辅助"."吟游者"]
+"海蒂" = "Heidi"
+"空" = "Sora"
+"浊心斯卡蒂" = "Skadi_the_Corrupting_Heart"
+
+["辅助"."护佑者"]
+"夏栎" = "Quercus"
+"九色鹿" = "Nine-Colored_Deer"
+"月禾" = "Tsukinogi"
+
+["辅助"."削弱者"]
+"初雪" = "Pramanix"
+"巫恋" = "Shamare"
+"灵知" = "Gnosis"
+
+["辅助"."工匠"]
+"掠风" = "Windflit"
+"罗比菈塔" = "Roberta"
