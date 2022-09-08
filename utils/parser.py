@@ -114,12 +114,12 @@ def parse(source: str) -> dict:
     operator['精英化材料'] = {}
 
     def parse_elite(stage: str) -> None:
-        operator['精英化材料'][f'{stage}'] = {}
+        operator['精英化材料'][stage] = {}
         items = re.search(rf'\|{stage}=(.*)\n', source).group(1).split(' ')
         for item in items:
             k = item.split('|')[1]
             v = item.split('|')[2].rstrip('}')
-            operator['精英化材料'][f'{stage}'][k] = try_int(v)
+            operator['精英化材料'][stage][k] = try_int(v)
 
     parse_elite('精1')
     if rarity == '2':
@@ -129,6 +129,39 @@ def parse(source: str) -> dict:
 
     skill2 = source.index('技能2（精英1开放）')
     parse_skill('二技能', skill2)
+
+    # 解析干员模组信息
+    def parse_module():
+        begin = source.index('{{模组')
+        begin = source.index('{{模组', begin+4)
+        end = source.index('\n}}', begin)
+        module_text = source[begin:end]
+        operator['模组'] = {}
+        for attr in module_text.split('\n'):
+            pair = attr.split('=')
+            try:
+                v = try_int(pair[1])
+            except IndexError:
+                continue
+            k = pair[0].lstrip('|')
+            operator['模组'][k] = v
+        for attr in ('类型颜色', '特性追加', '基础信息'):
+            try:
+                del operator['模组'][attr]
+            except KeyError:
+                continue
+        for level in ("材料消耗", "材料消耗2", "材料消耗3"):
+            materials = operator['模组'][level].split(' ')
+            operator['模组'][level] = {}
+            for item in materials:
+                k = item.split('|')[1]
+                v = item.split('|')[2].rstrip('}')
+                operator['模组'][level][k] = try_int(v)
+
+    try:
+        parse_module()
+    except ValueError:
+        pass
 
     if rarity in '34':
         return operator
