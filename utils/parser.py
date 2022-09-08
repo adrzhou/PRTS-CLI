@@ -44,21 +44,40 @@ def parse(source: str) -> dict:
                     value = re.search(rf'\|技能专精{int(level) - 7}{attr}=(.*)\n', text).group(1)
                     operator[skill][level][attr] = try_int(value)
 
-    # Remove HTML tags from source
-    tags = ('<ref.*?ref>', '<.*?>')
+    # Substitute HTML line breaks with colons
+    source = re.sub(re.compile(r'<br/>'), ' ', source)
+
+    # Remove HTML tags and other annotations from source
+    tags = ('<ref.*?ref>', '<.*?>', '&lt;', '&gt;', '{{±.*?}}', r'\[\[关卡一览.*?\]\]',
+            '{{攻击范围.*?}}', r'{{fa\|plus-circle\|color.*?}}')
     for tag in tags:
         source = re.sub(re.compile(tag), '', source)
 
     # Remove style notations from source
     def extract(match):
-        return re.search(r'\|.*?\|(.*?)}}', match.group(0)).group(1)
+        pattern = match.re.pattern
+        if pattern in (r'{{color\|.*?}}', r'{{color\|.*?}}', r'{{\*\|.*?}}', r'{{\*\*\|.*?}}',
+                       r'{{\+\|.*?}}', r'{{术语\|.*?}}', r'{{\+\+\|.*?}}'):
+            return re.search(r'\|.*?\|(.*?)}}', match.group(0)).group(1)
+        elif pattern == r'{{变动数值lite\|.*?\|蓝\|.*?}}':
+            return re.search(r'\|蓝\|(.*?)}}', match.group(0)).group(1)
+        elif pattern == r'{{变动数值lite\|\|橙\|.*?}}':
+            return re.search(r'\|橙\|(.*?)}}', match.group(0)).group(1)
+        elif pattern == '{{修正.*?}}':
+            return re.search(r'{{修正\|(.*?)\|.*?}}', match.group(0)).group(1)
 
-    notations = (r'{{color\|.*?}}', r'{{\*\|.*?}}', r'{{\*\*\|.*?}}',
-                 r'{{\+\|.*?}}', r'{{术语\|.*?}}')
+    notations = (r'{{color\|.*?}}',
+                 r'{{color\|.*?}}',
+                 r'{{\*\|.*?}}',
+                 r'{{\*\*\|.*?}}',
+                 r'{{\+\|.*?}}',
+                 r'{{术语\|.*?}}',
+                 r'{{\+\+\|.*?}}',
+                 r'{{变动数值lite\|.*?\|蓝\|.*?}}',
+                 r'{{变动数值lite\|\|橙\|.*?}}', '{{修正.*?}}')
+
     for notation in notations:
         source = re.sub(notation, extract, source)
-        # TODO
-        # source = re.sub('{{修正\|.*?}}', extract, source)
 
     keys = ('干员名', '干员外文名', '情报编号', '特性', '稀有度', '职业', '分支', '位置', '标签',
             '画师', '日文配音')
@@ -80,6 +99,10 @@ def parse(source: str) -> dict:
 
     source = source[source.index('{{天赋'):]
     parse_section('天赋')
+    try:
+        del operator['天赋']['备注']
+    except KeyError:
+        pass
 
     try:
         source = source[source.index('{{潜能提升'):]
@@ -133,7 +156,7 @@ def parse(source: str) -> dict:
     # 解析干员模组信息
     def parse_module():
         begin = source.index('{{模组')
-        begin = source.index('{{模组', begin+4)
+        begin = source.index('{{模组', begin + 4)
         end = source.index('\n}}', begin)
         module_text = source[begin:end]
         operator['模组'] = {}
