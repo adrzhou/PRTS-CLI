@@ -60,6 +60,7 @@ def alias(args):
 @click.option('-a', '--all', 'all_', is_flag=True, help='清除所有干员别名')
 @click.argument('aliases', nargs=-1)
 def unalias(all_, aliases):
+    """删除干员别名"""
     with open(config_path, 'rb') as config_file:
         config = tomli.load(config_file)
     if all_:

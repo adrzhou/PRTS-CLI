@@ -12,6 +12,7 @@
 "泡普卡" = "Popukar"
 "幽灵鲨" = "Specter"
 "煌" = "Blaze"
+"百炼嘉维尔" = "Gavial_the_Invincible"
 
 ["近卫"."无畏者"]
 "芙兰卡" = "Franka"
@@ -61,6 +62,7 @@ Castle-3 = "Castle-3"
 
 ["近卫"."解放者"]
 "龙舌兰" = "Tequila"
+"玛恩纳" = "Młynar"
 
 ["医疗"."疗养师"]
 "清流" = "Purestream"
@@ -126,6 +128,9 @@ Lancet-2 = "Lancet-2"
 "格拉尼" = "Grani"
 "红豆" = "Vigna"
 
+["先锋"."情报官"]
+"晓歌" = "Cantabile"
+
 ["术师"."轰击术师"]
 "蚀清" = "Corroserum"
 "伊芙利特" = "Ifrit"
@@ -173,6 +178,7 @@ Lancet-2 = "Lancet-2"
 "耶拉" = "Kjera"
 "澄闪" = "Goldenglow"
 "洛洛" = "Rockrock"
+"至简" = "Minimalist"
 
 ["狙击"."神射手"]
 "安哲拉" = "Andreana"
@@ -202,6 +208,7 @@ Lancet-2 = "Lancet-2"
 "酸糖" = "Aciddrop"
 "普罗旺斯" = "Provence"
 "黑" = "Schwarz"
+"鸿雪" = "Позёмка"
 
 ["狙击"."散射手"]
 "奥斯塔" = "Aosta"
@@ -319,6 +326,7 @@ THRM-EX = "Thermal-EX"
 "波登可" = "Podenco"
 "真理" = "Истина"
 "铃兰" = "Suzuran"
+"但书" = "Proviso"
 
 ["辅助"."召唤师"]
 "深海色" = "Deepcolor"
