@@ -1,4 +1,4 @@
 .idea
 temp
-subcommands/__pycache__/
+subcommands/__pycache__/*
 utils/__pycache__/
