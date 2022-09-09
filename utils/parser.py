@@ -1,8 +1,9 @@
 import re
+from collections import OrderedDict
 
 
 def parse(source: str) -> dict:
-    operator = {}
+    operator = OrderedDict()
     source = source[:source.index('==干员档案==')]
 
     def try_int(string):
@@ -192,4 +193,8 @@ def parse(source: str) -> dict:
     skill3 = source.index('技能3（精英2开放）')
     parse_skill('三技能', skill3)
 
+    try:
+        operator.move_to_end('模组')
+    except KeyError:
+        pass
     return operator
