@@ -16,7 +16,7 @@ data_path = package_path.joinpath('data')
 @click.option('-e', '--elite', 'elite', type=click.IntRange(0, 2), help='设置干员精英等级')
 @click.option('-r', '--rank', 'rank', type=click.IntRange(1, 10), help='设置干员技能等级')
 @click.option('-s', '--skill', 'skill', type=click.IntRange(1, 3), help='设置干员特定技能的专精等级')
-@click.option('-m', '--module', 'module', type=click.IntRange(1, 3), help='设置干员模组阶段')
+@click.option('-m', '--module', 'module', type=click.IntRange(0, 3), help='设置干员模组阶段')
 def track(operator, elite, rank, skill, module):
     """追踪干员练度与仓库材料"""
 
@@ -25,6 +25,7 @@ def track(operator, elite, rank, skill, module):
     if not operator:
         click.echo(tomli_w.dumps(profile['tracking']).replace('"', ''))
     else:
+        kanji = {1: '一', 2: '二', 3: '三'}
         for op in operator:
             try:
                 op_dict = load_dict(op)
@@ -32,24 +33,63 @@ def track(operator, elite, rank, skill, module):
                 click.echo(f'未找到名叫或别名为{op}的干员')
                 continue
             op_name = op_dict['干员信息']['干员名']
+            rarity = int(op_dict['干员信息']['稀有度'])
             if op_name in profile['tracking'].keys():
                 output = profile['tracking'][op_name]
             else:
-                rarity = int(op_dict['干员信息']['稀有度'])
                 output = profile['tracking'][op_name] = {'精英': 0}
                 if rarity > 1:
                     output['一技能'] = 1
                 if rarity > 2:
                     output['二技能'] = 1
-                if rarity > 4:
+                if rarity == 5:
                     output['三技能'] = 1
                 if '模组' in op_dict.keys():
                     output['模组'] = 0
-            if not (elite and rank and skill and module):
+            if not (elite in (0, 1, 2) or rank or skill or module in (0, 1, 2, 3)):
                 click.echo(op_name)
                 click.echo(tomli_w.dumps(output).replace('"', ''))
-                with open(profile_path, 'wb') as pro_file:
-                    tomli_w.dump(profile, pro_file)
+            else:
+                if elite in (0, 1, 2):
+                    if rarity < 2 or (rarity < 3 and elite == 2):
+                        click.echo(f'干员{op_name}无法晋升至精英{elite}')
+                    else:
+                        output['精英'] = elite
+                if rank:
+                    if rarity < 2:
+                        click.echo(f'干员{op_name}无法提升技能等级')
+                    elif 0 < rank < 8:
+                        output['一技能'] = rank
+                        if rarity > 2:
+                            output['二技能'] = rank
+                        if rarity == 5:
+                            output['三技能'] = rank
+                        if rank > 4 and output['精英'] == 0:
+                            output['精英'] = 1
+                    else:
+                        if output['精英'] < 2:
+                            output['精英'] = 2
+                        if skill:
+                            if rarity == 2:
+                                click.echo(f'干员{op_name}无法专精技能')
+                            elif skill == 3 and rarity < 5:
+                                click.echo(f'干员{op_name}没有三技能')
+                            else:
+                                output[f'{kanji[skill]}技能'] = rank
+                                for i in kanji.values():
+                                    if output[f'{i}技能'] < 7:
+                                        output[f'{i}技能'] = 7
+                        else:
+                            output['一技能'] = rank
+                            if rarity > 2:
+                                output['二技能'] = rank
+                            if rarity == 5:
+                                output['三技能'] = rank
+                if module in (0, 1, 2, 3):
+                    if '模组' in op_dict.keys():
+                        output['模组'] = module
+            with open(profile_path, 'wb') as pro_file:
+                tomli_w.dump(profile, pro_file)
 
 
 @click.command(no_args_is_help=True)
