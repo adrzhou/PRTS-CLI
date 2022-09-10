@@ -187,6 +187,8 @@ def parse(source: str) -> dict:
     except ValueError:
         pass
 
+    # TODO: Parse operators with multiple modules
+
     if rarity in '34':
         return operator
 
