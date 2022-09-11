@@ -32,7 +32,7 @@ def alias(args, material):
                 if len(split_arg) > 2:
                     click.echo(f'无法用{arg}创建材料别名')
                     click.echo('请使用以下格式创建材料别名')
-                    click.echo('材料别名=材料名')
+                    click.echo('材料别名=材料原名')
                 elif len(split_arg) == 2:
                     new_alias, mat_name = tuple(split_arg)
                     if new_alias in inventory:
