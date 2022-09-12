@@ -44,7 +44,7 @@ def track(operator, elite, rank, skill, module, goal):
 
             # Add new operator to tracking list
             else:
-                output = profile['tracking'][op_name] = {'精英': 0, '目标': {}}
+                output = profile['tracking'][op_name] = {'目前': {}, '目标': {}}
                 set_init(op_dict, output, rarity)
 
             # No options provided
@@ -91,18 +91,19 @@ def set_init(op_dict: dict, output: dict, rarity: int) -> None:
     """Helper for initializing a tracked operator"""
 
     if rarity > 1:
-        output['一技能'] = 1
+        output['目前']['精英'] = 1
+        output['目前']['一技能'] = 1
         output['目标']['精英'] = 1
         output['目标']['一技能'] = 7
     if rarity > 2:
-        output['二技能'] = 1
+        output['目前']['二技能'] = 1
         output['目标']['精英'] = 2
         output['目标']['二技能'] = 7
     if rarity == 5:
-        output['三技能'] = 1
+        output['目前']['三技能'] = 1
         output['目标']['三技能'] = 7
     if '模组' in op_dict.keys():
-        output['模组'] = 0
+        output['目前']['模组'] = 0
         output['目标']['模组'] = 3
 
 
@@ -131,20 +132,20 @@ def set_elite(goal: bool, elite: int, rarity: int, op_name: str, output: dict) -
                 output['目标']['模组'] = 0
         return
 
-    output['精英'] = elite
+    output['目前']['精英'] = elite
     # 精英0的干员技能等级不大于4且未解锁模组
     if elite == 0:
-        for k, v in output.items():
+        for k, v in output['目前'].items():
             if k.endswith('技能') and v > 4:
-                output[k] = 4
-        if '模组' in output['目标'].keys():
-            output['模组'] = 0
+                output['目前'][k] = 4
+        if '模组' in output['目前'].keys():
+            output['目前']['模组'] = 0
     # 精英1的干员技能等级不大于7且未解锁模组
     elif elite == 1:
-        for k, v in output.items():
+        for k, v in output['目前'].items():
             if k.endswith('技能') and v > 7:
-                output[k] = 7
-        if '模组' in output['目标'].keys():
+                output['目前'][k] = 7
+        if '模组' in output['目前'].keys():
             output['模组'] = 0
 
 
@@ -173,20 +174,20 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, op_name: str, outpu
                 if rank > 4:
                     output['目标']['精英'] = 1
                 return
-            for k, v in output.items():
+            for k, v in output['目前'].items():
                 if k.endswith('技能'):
-                    output[k] = rank
+                    output['目前'][k] = rank
             if rank > 4:
-                output['精英'] = 1
+                output['目前']['精英'] = 1
             return
         if goal:
             output['目标'][skill] = rank
             if rank > 7:
                 output['目标']['精英'] = 2
             return
-        output[skill] = rank
+        output['目前'][skill] = rank
         if rank > 7:
-            output['精英'] = 1
+            output['目前']['精英'] = 1
     elif rank:
         if rarity == 2 and rank > 7:
             click.echo(f'干员{op_name}无法专精技能')
@@ -200,13 +201,13 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, op_name: str, outpu
             if rank > 7:
                 output['目标']['精英'] = 2
             return
-        for k, v in output.items():
+        for k, v in output['目前'].items():
             if k.endswith('技能'):
-                output[k] = rank
+                output['目前'][k] = rank
         if rank > 4:
-            output['精英'] = 1
+            output['目前']['精英'] = 1
         if rank > 7:
-            output['精英'] = 2
+            output['目前']['精英'] = 2
         return
 
 
@@ -219,6 +220,6 @@ def set_module(goal: bool, output: dict, module: int) -> None:
             if module in range(1, 4):
                 output['目标']['精英'] = 2
         else:
-            output['模组'] = module
+            output['目前']['模组'] = module
             if module in range(1, 4):
-                output['精英'] = 2
+                output['目前']['精英'] = 2

@@ -45,7 +45,7 @@ def plan(args, synth, optimal, up, inventory):
             tomli_w.dump(config, config_file)
         return
 
-    if inventory and args:
+    if inventory:
         for arg in args:
             split_arg = [s for s in arg.split('=') if s]
             if len(split_arg) > 2:
@@ -80,4 +80,4 @@ def plan(args, synth, optimal, up, inventory):
             tomli_w.dump(profile, pro_file)
         return
 
-    if not args:
+
