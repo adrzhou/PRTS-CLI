@@ -1,4 +1,4 @@
-[tracking]
+[tracker]
 
 [inventory."D32钢"]
 rarity = 5
@@ -66,7 +66,7 @@ amount = 0
 
 [inventory."全新装置"]
 rarity = 3
-amount = 3
+amount = 0
 
 [inventory."装置"]
 rarity = 2
@@ -114,7 +114,7 @@ amount = 0
 
 [inventory."异铁组"]
 rarity = 3
-amount = 2
+amount = 0
 
 [inventory."异铁"]
 rarity = 2

@@ -27,7 +27,7 @@ def track(operator, elite, rank, skill, module, goal):
 
     # No arguments provided
     if not operator:
-        click.echo(tomli_w.dumps(profile['tracking']).replace('"', ''))
+        click.echo(tomli_w.dumps(profile['tracker']).replace('"', ''))
     else:
         for op in operator:
             try:
@@ -39,12 +39,12 @@ def track(operator, elite, rank, skill, module, goal):
             rarity = int(op_dict['干员信息']['稀有度'])
 
             # Operator already tracked
-            if op_name in profile['tracking'].keys():
-                output = profile['tracking'][op_name]
+            if op_name in profile['tracker'].keys():
+                output = profile['tracker'][op_name]
 
             # Add new operator to tracking list
             else:
-                output = profile['tracking'][op_name] = {'目前': {}, '目标': {}}
+                output = profile['tracker'][op_name] = {'目前': {}, '目标': {}}
                 set_init(op_dict, output, rarity)
 
             # No options provided
@@ -73,7 +73,7 @@ def untrack(operator, all_):
     with open(profile_path, 'rb') as pro_file:
         profile = tomli.load(pro_file)
     if all_:
-        profile['tracking'].clear()
+        profile['tracker'].clear()
     else:
         for op in operator:
             try:
@@ -82,7 +82,7 @@ def untrack(operator, all_):
                 click.echo(f'未找到名叫或别名为{op}的干员')
                 continue
             op_name = op_dict['干员信息']['干员名']
-            del profile['tracking'][op_name]
+            del profile['tracker'][op_name]
     with open(profile_path, 'wb') as pro_file:
         tomli_w.dump(profile, pro_file)
 
@@ -91,7 +91,7 @@ def set_init(op_dict: dict, output: dict, rarity: int) -> None:
     """Helper for initializing a tracked operator"""
 
     if rarity > 1:
-        output['目前']['精英'] = 1
+        output['目前']['精英'] = 0
         output['目前']['一技能'] = 1
         output['目标']['精英'] = 1
         output['目标']['一技能'] = 7
@@ -214,7 +214,7 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, op_name: str, outpu
 def set_module(goal: bool, output: dict, module: int) -> None:
     """Helper for setting an operator's module phase"""
 
-    if '模组' in output.keys():
+    if '模组' in output['目标'].keys():
         if goal:
             output['目标']['模组'] = module
             if module in range(1, 4):
