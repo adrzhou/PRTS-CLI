@@ -2,7 +2,7 @@ import click
 import pathlib
 import tomli
 import tomli_w
-from utils.loader import load_dict
+from utils.loader import load_oprt
 
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('config.toml')
@@ -31,7 +31,7 @@ def track(operator, elite, rank, skill, module, goal):
     else:
         for op in operator:
             try:
-                op_dict = load_dict(op)
+                op_dict = load_oprt(op)
             except KeyError:
                 click.echo(f'未找到名叫或别名为{op}的干员')
                 continue
@@ -77,7 +77,7 @@ def untrack(operator, all_):
     else:
         for op in operator:
             try:
-                op_dict = load_dict(op)
+                op_dict = load_oprt(op)
             except KeyError:
                 click.echo(f'未找到名叫或别名为{op}的干员')
                 continue

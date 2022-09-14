@@ -3,7 +3,7 @@ import tomli
 import tomli_w
 import pathlib
 from tabulate import tabulate
-from utils.loader import load_dict
+from utils.loader import load_oprt
 from utils.formulae import formulae
 
 package_path = pathlib.Path(__file__).parents[1]
@@ -90,7 +90,7 @@ def plan(args, synth, optimal, up, inventory):
         cur_op = summary[oprt] = {}
         status = tracker['目前']
         goal = tracker['目标']
-        op_dict = load_dict(oprt)
+        op_dict = load_oprt(oprt)
         set_need(cur_op, status, goal, op_dict)
 
         for skill, req in cur_op.items():
