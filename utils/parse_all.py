@@ -32,7 +32,7 @@ for source in source_path.iterdir():
 
     # Register operator's chinese name and foreign name
     name = operator['干员信息']['干员名']
-    foreign_name = operator['干员信息']['干员外文名'].replace(' ', '_').lower()
+    foreign_name = operator['干员信息']['干员外文名'].upper()
     names[name] = names[foreign_name] = oprt_filename
 
     # Register operator's class and subclass

@@ -18,6 +18,7 @@ def load_oprt(name: str) -> dict:
     if stem := names.get(name, False):
         name = f'{stem}.toml'
     elif stem := aliases.get(name, False):
+        stem = names[stem]
         name = f'{stem}.toml'
     elif stem := names.get(name.replace(' ', '_').lower(), False):
         name = f'{stem}.toml'
