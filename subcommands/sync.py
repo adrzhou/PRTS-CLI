@@ -19,54 +19,64 @@ names_path = package_path.joinpath('reserved_names.toml')
 def sync(subclass, operators):
     """将本地数据与prts.wiki同步"""
 
+    def get_source(name: str):
+        response = requests.get(rf'https://prts.wiki/index.php?title={name}&action=edit')
+        soup = BeautifulSoup(response.text, features='html.parser')
+        return soup.find(id='wpTextbox1')
+
     with open(catalog_path, 'rb') as catalog_file:
         catalog: dict = tomli.load(catalog_file)
+
     if subclass:
-        for sc in operators:
-            ops = []
+        for subcls in operators:
+            tasks = []
             for cls in catalog.values():
-                if sc in cls.keys():
-                    ops = cls[sc].keys()
+                if subcls in cls.keys():
+                    tasks = cls[subcls].keys()
                     break
-            for op in ops:
-                response = requests.get(rf'https://prts.wiki/index.php?title={op}&action=edit')
-                soup = BeautifulSoup(response.text, features='html.parser')
-                source = soup.find(id='wpTextbox1')
-                if source:
-                    op_dict = parse(source.text)
-                    op_filename = op_dict['干员信息']['干员外文名'].replace(' ', '_')
-                    output_path = data_path.joinpath(f"{op_filename}.toml")
-                    with open(output_path, 'wb') as output_file:
-                        tomli_w.dump(op_dict, output_file)
-                    click.echo(f'成功更新**{op}**的干员信息')
-                else:
-                    click.echo(f'ERROR: 未找到干员**{op}**的wiki页面')
+            for oprt in tasks:
+                source = get_source(oprt)
+                try:
+                    oprt_data = parse(source.text)
+                    stem = oprt_data['干员信息']['情报编号']
+                    oprt_path = data_path.joinpath(f"{stem}.toml")
+                    with open(oprt_path, 'wb') as oprt_file:
+                        tomli_w.dump(oprt_data, oprt_file)
+                    click.echo(f'成功更新**{oprt}**的干员信息')
+                except ValueError:
+                    click.echo(f'ERROR: 未找到干员**{oprt}**的wiki页面')
     else:
         with open(config_path, 'rb') as config_file:
             config: dict = tomli.load(config_file)
         with open(names_path, 'rb') as names_file:
             names: dict = tomli.load(names_file)
-        for op in operators:
-            op = config['alias'].get(op, op)
-            response = requests.get(rf'https://prts.wiki/index.php?title={op}&action=edit')
-            soup = BeautifulSoup(response.text, features='html.parser')
-            source = soup.find(id='wpTextbox1')
-            if source:
-                op_dict = parse(source.text)
-                op_filename = op_dict['干员信息']['干员外文名'].replace(' ', '_')
-                output_path = data_path.joinpath(f"{op_filename}.toml")
-                with open(output_path, 'wb') as output_file:
-                    tomli_w.dump(op_dict, output_file)
-                op_class = op_dict['干员信息']['职业']
-                op_subclass = op_dict['干员信息']['分支']
-                if op_subclass not in catalog[op_class]:
-                    catalog[op_class][op_subclass] = {}
-                names[f"{op_dict['干员信息']['干员名']}"] = op_filename
-                catalog[op_class][op_subclass][f"{op_dict['干员信息']['干员名']}"] = op_filename
+        for oprt in operators:
+            oprt = config['alias'].get(oprt.upper(), oprt).lower()
+            source = get_source(oprt)
+            if '#redirect' in source.text:
+                start = source.text.index('[[')
+                end = source.text.index(']]')
+                redirect = source.text[start + 2:end]
+                source = get_source(redirect)
+            try:
+                oprt_data = parse(source.text)
+                stem = oprt_data['干员信息']['情报编号']
+                oprt_path = data_path.joinpath(f"{stem}.toml")
+                with open(oprt_path, 'wb') as oprt_file:
+                    tomli_w.dump(oprt_data, oprt_file)
 
-                click.echo(f'成功更新**{op}**的干员信息')
-            else:
-                click.echo(f'ERROR: 未找到干员**{op}**的wiki页面')
+                oprt_name = oprt_data['干员信息']['干员名']
+                oprt_cls = oprt_data['干员信息']['职业']
+                oprt_subcls = oprt_data['干员信息']['分支']
+                if oprt_subcls not in catalog[oprt_cls]:
+                    catalog[oprt_cls][oprt_subcls] = {}
+                names[f"{oprt_data['干员信息']['干员名']}"] = stem
+                catalog[oprt_cls][oprt_subcls][oprt_name] = stem
+
+                click.echo(f'成功更新**{oprt_name}**的干员信息')
+            except ValueError:
+                click.echo(f'ERROR: 未找到干员**{oprt}**的wiki页面')
+
         with open(catalog_path, 'wb') as catalog_file:
             tomli_w.dump(catalog, catalog_file)
         with open(names_path, 'wb') as names_file:
