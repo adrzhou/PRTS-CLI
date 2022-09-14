@@ -20,7 +20,7 @@ def load_oprt(name: str) -> dict:
     elif stem := aliases.get(name, False):
         stem = names[stem]
         name = f'{stem}.toml'
-    elif stem := names.get(name.replace(' ', '_').lower(), False):
+    elif stem := names.get(name.upper(), False):
         name = f'{stem}.toml'
     else:
         raise KeyError

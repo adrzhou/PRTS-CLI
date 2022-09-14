@@ -1,7 +1,8 @@
 import click
 import pathlib
-import tomli
 import tomli_w
+from tabulate import tabulate
+from utils.loader import load_oprt
 
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('config.toml')
@@ -11,7 +12,7 @@ names_path = package_path.joinpath('reserved_names.toml')
 
 @click.command(no_args_is_help=True)
 @click.option('-P', '--pager', 'pager', is_flag=True, help='分页显示查询结果')
-@click.option('-g', '--general', 'general', is_flag=False, flag_value='all', multiple=True, help='查询干员基本信息')
+@click.option('-g', '--general', 'general', is_flag=True, help='查询干员基本信息')
 @click.option('-a', '--attr', 'attr', is_flag=True, help='查询干员属性')
 @click.option('-t', '--talent', 'talent', is_flag=True, help='查询干员天赋')
 @click.option('-s', '--skill', 'skill', is_flag=False, flag_value=0, multiple=True, type=int, help='查询干员技能')
@@ -25,51 +26,39 @@ names_path = package_path.joinpath('reserved_names.toml')
 def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, operator):
     """查询干员信息"""
 
+    # Options were provided but no operator found
     if not operator:
         click.echo('请添加需要查询的干员名称或别名之后重试')
         return
-    if data_path.joinpath(f'{operator}.toml') in data_path.iterdir():
-        operator_path = f'{operator}.toml'
-    else:
-        with open(config_path, 'rb') as config_file:
-            config: dict = tomli.load(config_file)
-        with open(names_path, 'rb') as names_file:
-            names: dict = tomli.load(names_file)
-        if operator in names:
-            operator_path = f'{names[operator]}.toml'
-        elif operator in config['alias']:
-            operator_path = f'{config["alias"][operator]}.toml'
-        else:
-            click.echo(f'未找到名叫或别名为{operator}的干员')
-            return
-    with open(data_path.joinpath(operator_path), 'rb') as operator_file:
-        operator_dict = tomli.load(operator_file)
 
-    output = {}
+    try:
+        oprt = load_oprt(operator)
+        oprt['干员信息']['稀有度'] = int(oprt['干员信息']['稀有度']) + 1
+    except KeyError:
+        click.echo(f'未找到名叫或别名为{operator}的干员')
+        return
 
-    if 'all' in general:
-        output['干员信息'] = operator_dict['干员信息']
-    elif general:
-        output['干员信息'] = {}
-        for query in set(general):
-            try:
-                output['干员信息'][query] = operator_dict['干员信息'][query]
-            except KeyError:
-                click.echo(f'未找到干员的**{query}**属性')
-                continue
-    else:
+    # If user only provides the operator argument
+    everything = not (general or attr or talent or skill or elite or module)
+    if everything:
+        # TODO: print everything
         pass
 
+    output = []
+
+    if general:
+        output.append(tabulate_general(oprt))
+
     if attr:
-        output['属性'] = operator_dict['属性']
+        output.append(tabulate_attr(oprt))
     if talent:
-        output['天赋'] = operator_dict['天赋']
+        output['天赋'] = oprt['天赋']
 
     if elite in (0, 1, 2):
         section = output[f'精英{elite}'] = {}
-        section['部署费用'] = operator_dict['属性']['部署费用']
-        section['阻挡数'] = operator_dict['属性']['阻挡数']
-        for key, value in operator_dict['属性'].items():
+        section['部署费用'] = oprt['属性']['部署费用']
+        section['阻挡数'] = oprt['属性']['阻挡数']
+        for key, value in oprt['属性'].items():
             if key.startswith(f'精英{elite}'):
                 section[key] = value
         if upgrade:
@@ -79,7 +68,7 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
                 click.echo('晋升至精英0不需要精英化材料')
             else:
                 try:
-                    section['精英化材料'] = operator_dict['精英化材料'][f'精{elite}']
+                    section['精英化材料'] = oprt['精英化材料'][f'精{elite}']
                 except KeyError:
                     click.echo(f'该干员无法晋升至精英{elite}')
 
@@ -87,12 +76,12 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
         kanji = {1: '一', 2: '二', 3: '三'}
         section = output['技能'] = {}
         if 0 in skill:
-            if operator_dict['干员信息']['稀有度'] in '01':
+            if oprt['干员信息']['稀有度'] in '01':
                 click.echo('一星和二星干员无技能')
                 del output['技能']
             for sk in kanji.values():
                 try:
-                    section[f'{sk}'] = operator_dict[f'{sk}技能']
+                    section[f'{sk}'] = oprt[f'{sk}技能']
                 except KeyError:
                     continue
         else:
@@ -103,7 +92,7 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
                     break
                 if 0 in rank:
                     try:
-                        section[f'{kanji[sk]}技能'] = operator_dict[f'{kanji[sk]}技能']
+                        section[f'{kanji[sk]}技能'] = oprt[f'{kanji[sk]}技能']
                     except KeyError:
                         click.echo(f'该干员没有{kanji[sk]}技能')
                         break
@@ -115,7 +104,7 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
                         if r > 10:
                             break
                         try:
-                            section[f'{kanji[sk]}'][str(r)] = operator_dict[f'{kanji[sk]}技能'][str(r)]
+                            section[f'{kanji[sk]}'][str(r)] = oprt[f'{kanji[sk]}技能'][str(r)]
                         except KeyError:
                             click.echo('该干员技能等级最高为7')
                             rank = [i for i in rank if 0 < i < 8]
@@ -139,20 +128,53 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
                     except ValueError:
                         continue
                     if 1 < int(r) < 8:
-                        section[sk][r]['升级材料'] = operator_dict['技能升级材料'][str(r)]
+                        section[sk][r]['升级材料'] = oprt['技能升级材料'][str(r)]
                     elif int(r) > 7:
-                        section[sk][r]['升级材料'] = operator_dict['技能升级材料'][f'{sk[0]}{r}']
+                        section[sk][r]['升级材料'] = oprt['技能升级材料'][f'{sk[0]}{r}']
                     else:
                         pass
 
     if module:
-        output['模组'] = {k: v for k, v in operator_dict['模组'].items() if not k.startswith('材料消耗')}
+        output['模组'] = {k: v for k, v in oprt['模组'].items() if not k.startswith('材料消耗')}
         if upgrade:
             if upgrade == 'upgrade_only':
                 output['模组'].clear()
-            output['模组'].update({k: v for k, v in operator_dict['模组'].items() if k.startswith('材料消耗')})
+            output['模组'].update({k: v for k, v in oprt['模组'].items() if k.startswith('材料消耗')})
 
     if pager:
-        click.echo_via_pager(tomli_w.dumps(output).replace('"', ''))
+        click.echo_via_pager('\n'.join(output))
     else:
-        click.echo(tomli_w.dumps(output).replace('"', ''))
+        click.echo('\n'.join(output))
+
+
+def tabulate_general(oprt: dict):
+    general = []
+    for key, value in oprt['干员信息'].items():
+        general.append([key, value])
+    return tabulate(general, tablefmt='pretty')
+
+
+def tabulate_attr(oprt: dict):
+    attr1 = []
+    for key in ('再部署', '部署费用', '阻挡数', '攻击速度'):
+        value = oprt['属性'][key]
+        attr1.append([key, value])
+    attr1 = tabulate(attr1, tablefmt='pretty')
+
+    attr2 = []
+    attr2_header = ['属性', '精英0 1级', '精英0 满级', '信赖加成']
+    rarity = oprt['干员信息']['稀有度']
+    if rarity > 2:
+        attr2_header.insert(-1, '精英1 满级')
+    if rarity > 3:
+        attr2_header.insert(-1, '精英2 满级')
+    for attr in ('生命上限', '攻击', '防御', '法术抗性'):
+        row = [attr]
+        for col in attr2_header[1:]:
+            key = col.replace(' ', '_') + '_' + attr
+            value = oprt['属性'].get(key, None)
+            row.append(value)
+        attr2.append(row)
+    attr2 = tabulate(attr2, headers=attr2_header, tablefmt='github')
+
+    return f'{attr1}\n\n{attr2}'
