@@ -53,29 +53,33 @@ def sync(subclass, operators):
         for oprt in operators:
             oprt = config['alias'].get(oprt.upper(), oprt).lower()
             source = get_source(oprt)
-            if '#redirect' in source.text:
-                start = source.text.index('[[')
-                end = source.text.index(']]')
-                redirect = source.text[start + 2:end]
-                source = get_source(redirect)
-            try:
-                oprt_data = parse(source.text)
-                stem = oprt_data['干员信息']['情报编号']
-                oprt_path = data_path.joinpath(f"{stem}.toml")
-                with open(oprt_path, 'wb') as oprt_file:
-                    tomli_w.dump(oprt_data, oprt_file)
-
-                oprt_name = oprt_data['干员信息']['干员名']
-                oprt_cls = oprt_data['干员信息']['职业']
-                oprt_subcls = oprt_data['干员信息']['分支']
-                if oprt_subcls not in catalog[oprt_cls]:
-                    catalog[oprt_cls][oprt_subcls] = {}
-                names[f"{oprt_data['干员信息']['干员名']}"] = stem
-                catalog[oprt_cls][oprt_subcls][oprt_name] = stem
-
-                click.echo(f'成功更新**{oprt_name}**的干员信息')
-            except ValueError:
+            if not source:
                 click.echo(f'ERROR: 未找到干员**{oprt}**的wiki页面')
+                continue
+
+            source = source.text
+            if '#redirect' in source:
+                start = source.index('[[')
+                end = source.index(']]')
+                redirect = source[start + 2:end]
+                source = get_source(redirect)
+
+            oprt_data = parse(source)
+            stem = oprt_data['干员信息']['情报编号']
+            oprt_path = data_path.joinpath(f"{stem}.toml")
+            with open(oprt_path, 'wb') as oprt_file:
+                tomli_w.dump(oprt_data, oprt_file)
+
+            oprt_name = oprt_data['干员信息']['干员名']
+            oprt_cls = oprt_data['干员信息']['职业']
+            oprt_subcls = oprt_data['干员信息']['分支']
+            if oprt_subcls not in catalog[oprt_cls]:
+                catalog[oprt_cls][oprt_subcls] = {}
+            names[f"{oprt_data['干员信息']['干员名']}"] = stem
+            names[f"{oprt_data['干员信息']['干员外文名']}"] = stem
+            catalog[oprt_cls][oprt_subcls][oprt_name] = stem
+
+            click.echo(f'成功更新**{oprt_name}**的干员信息')
 
         with open(catalog_path, 'wb') as catalog_file:
             tomli_w.dump(catalog, catalog_file)
