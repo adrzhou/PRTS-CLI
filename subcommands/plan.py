@@ -3,12 +3,12 @@ import tomli
 import tomli_w
 import pathlib
 from tabulate import tabulate
-from utils.load_dict import load_dict
+from utils.loader import load_dict
 from utils.formulae import formulae
 
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('config.toml')
-names_path = package_path.joinpath('names_cn.toml')
+names_path = package_path.joinpath('reserved_names.toml')
 profile_path = package_path.joinpath('profile.toml')
 data_path = package_path.joinpath('data')
 

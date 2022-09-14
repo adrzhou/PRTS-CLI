@@ -2,11 +2,11 @@ import click
 import pathlib
 import tomli
 import tomli_w
-from utils.load_dict import load_dict
+from utils.loader import load_dict
 
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('config.toml')
-names_path = package_path.joinpath('names_cn.toml')
+names_path = package_path.joinpath('reserved_names.toml')
 profile_path = package_path.joinpath('profile.toml')
 data_path = package_path.joinpath('data')
 kanji = {1: '一', 2: '二', 3: '三'}

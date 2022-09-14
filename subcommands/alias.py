@@ -68,7 +68,7 @@ def alias(args, material):
                 if f'{new_alias}.toml' in os.listdir(data_path):
                     click.echo(f'{new_alias}无法作为干员别名使用')
                     continue
-                names_path = package_path.joinpath('names_cn.toml')
+                names_path = package_path.joinpath('reserved_names.toml')
                 with open(names_path, 'rb') as names_file:
                     names_cn: dict = tomli.load(names_file)
                 with open(config_path, 'rb') as config_file:

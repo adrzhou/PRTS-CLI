@@ -6,7 +6,7 @@ import tomli_w
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('config.toml')
 data_path = package_path.joinpath('data')
-names_path = package_path.joinpath('names_cn.toml')
+names_path = package_path.joinpath('reserved_names.toml')
 
 
 @click.command(no_args_is_help=True)
