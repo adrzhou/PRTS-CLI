@@ -1,6 +1,5 @@
 import click
 import pathlib
-import tomli_w
 from tabulate import tabulate
 from utils.loader import load_oprt
 
@@ -15,6 +14,7 @@ names_path = package_path.joinpath('reserved_names.toml')
 @click.option('-g', '--general', 'general', is_flag=True, help='查询干员基本信息')
 @click.option('-a', '--attr', 'attr', is_flag=True, help='查询干员属性')
 @click.option('-t', '--talent', 'talent', is_flag=True, help='查询干员天赋')
+@click.option('-p', '--potential', 'potential', is_flag=True, help='查询干员潜能')
 @click.option('-s', '--skill', 'skill', is_flag=False, flag_value=0, multiple=True, type=int, help='查询干员技能')
 @click.option('-r', '--rank', 'rank', default=[0], multiple=True, type=int, help='查询特定等级的技能')
 @click.option('-u', '--upgrade', 'upgrade', flag_value='upgrade', help='显示技能升级/精英化所需材料')
@@ -23,7 +23,7 @@ names_path = package_path.joinpath('reserved_names.toml')
               help='查询干员精英化之后的属性数据')
 @click.option('-m', '--module', 'module', is_flag=True, help='查询干员模组')
 @click.argument('operator', nargs=1, required=False)
-def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, operator):
+def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, module, operator):
     """查询干员信息"""
 
     # Options were provided but no operator found
@@ -51,8 +51,12 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
 
     if attr:
         output.append(tabulate_attr(oprt))
+
     if talent:
-        output['天赋'] = oprt['天赋']
+        output.append(tabulate_talent(oprt))
+
+    if potential:
+        output.append(tabulate_potential(oprt))
 
     if elite in (0, 1, 2):
         section = output[f'精英{elite}'] = {}
@@ -142,9 +146,9 @@ def wiki(pager, general, attr, talent, skill, rank, upgrade, elite, module, oper
             output['模组'].update({k: v for k, v in oprt['模组'].items() if k.startswith('材料消耗')})
 
     if pager:
-        click.echo_via_pager('\n'.join(output))
+        click.echo_via_pager('\n\n'.join(output))
     else:
-        click.echo('\n'.join(output))
+        click.echo('\n\n'.join(output))
 
 
 def tabulate_general(oprt: dict):
@@ -178,3 +182,32 @@ def tabulate_attr(oprt: dict):
     attr2 = tabulate(attr2, headers=attr2_header, tablefmt='github')
 
     return f'{attr1}\n\n{attr2}'
+
+
+def tabulate_talent(oprt: dict):
+    output = []
+    talent = oprt['天赋']
+    talents = {}
+
+    for key, value in talent.items():
+        if len(key) == 5:
+            if value not in talents:
+                talents[value] = []
+            condition = talent[key+'条件']
+            effect = talent[key + '效果']
+            talents[value].append([condition, effect])
+
+    for t, rows in talents.items():
+        header = ['条件', '效果']
+        table = tabulate(rows, headers=header, tablefmt='github')
+        output.append(f'{t}\n{table}')
+
+    return '\n\n'.join(output)
+
+
+def tabulate_potential(oprt: dict):
+    header = ['潜能提升', '']
+    rows = []
+    for key, value in oprt['潜能提升'].items():
+        rows.append([key, value])
+    return tabulate(rows, headers=header, tablefmt='github')
