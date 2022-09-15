@@ -200,6 +200,14 @@ def tabulate_potential(oprt: dict):
 
 
 def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
+    rarity = oprt['干员信息']['稀有度']
+    if rarity < 3 and elite > 0:
+        click.echo('一星和二星干员无法精英化')
+        return ''
+    if rarity == 3 and elite > 1:
+        click.echo('三星干员无法晋升至精英2')
+        return ''
+
     attr = oprt['属性']
     header = [f'精英{elite}_满级', '']
     rows = []
