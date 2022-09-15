@@ -6,9 +6,9 @@ from tabulate import tabulate
 from utils.loader import load_oprt
 
 package_path = pathlib.Path(__file__).parents[1]
-config_path = package_path.joinpath('config.toml')
-names_path = package_path.joinpath('reserved_names.toml')
-profile_path = package_path.joinpath('profile.toml')
+config_path = package_path.joinpath('usr', 'config.toml')
+names_path = package_path.joinpath('usr', 'reserved_names.toml')
+profile_path = package_path.joinpath('usr', 'profile.toml')
 data_path = package_path.joinpath('data')
 kanji = {1: '一', 2: '二', 3: '三'}
 

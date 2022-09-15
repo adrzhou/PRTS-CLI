@@ -3,7 +3,7 @@
 
 block_cipher = None
 
-added_files = [('*.toml', '.'),
+added_files = [('usr', 'usr'),
                ('LICENSE', '.'),
                ('data', 'data')
                ]

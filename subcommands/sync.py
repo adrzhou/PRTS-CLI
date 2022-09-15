@@ -7,10 +7,10 @@ from bs4 import BeautifulSoup
 from utils.parser import parse
 
 package_path = pathlib.Path(__file__).parents[1]
-catalog_path = package_path.joinpath('catalog.toml')
-config_path = package_path.joinpath('config.toml')
+catalog_path = package_path.joinpath('usr', 'catalog.toml')
+config_path = package_path.joinpath('usr', 'config.toml')
 data_path = package_path.joinpath('data')
-names_path = package_path.joinpath('reserved_names.toml')
+names_path = package_path.joinpath('usr', 'reserved_names.toml')
 
 
 @click.command(no_args_is_help=True)

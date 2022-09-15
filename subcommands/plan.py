@@ -7,9 +7,9 @@ from utils.loader import load_oprt
 from utils.formulae import formulae
 
 package_path = pathlib.Path(__file__).parents[1]
-config_path = package_path.joinpath('config.toml')
-names_path = package_path.joinpath('reserved_names.toml')
-profile_path = package_path.joinpath('profile.toml')
+config_path = package_path.joinpath('usr', 'config.toml')
+names_path = package_path.joinpath('usr', 'reserved_names.toml')
+profile_path = package_path.joinpath('usr', 'profile.toml')
 data_path = package_path.joinpath('data')
 
 exclude = ('龙门币', '技巧概要·卷1', '技巧概要·卷2', '技巧概要·卷3',

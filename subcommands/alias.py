@@ -4,9 +4,9 @@ import tomli
 import tomli_w
 
 package_path = pathlib.Path(__file__).parents[1]
-config_path = package_path.joinpath('config.toml')
-profile_path = package_path.joinpath('profile.toml')
-names_path = package_path.joinpath('reserved_names.toml')
+config_path = package_path.joinpath('usr', 'config.toml')
+profile_path = package_path.joinpath('usr', 'profile.toml')
+names_path = package_path.joinpath('usr', 'reserved_names.toml')
 data_path = package_path.joinpath('data')
 
 

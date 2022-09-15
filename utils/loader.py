@@ -2,8 +2,8 @@ import pathlib
 import tomli
 
 package_path = pathlib.Path(__file__).parents[1]
-config_path = package_path.joinpath('config.toml')
-names_path = package_path.joinpath('reserved_names.toml')
+config_path = package_path.joinpath('usr', 'config.toml')
+names_path = package_path.joinpath('usr', 'reserved_names.toml')
 data_path = package_path.joinpath('data')
 
 with open(config_path, 'rb') as config_file:
