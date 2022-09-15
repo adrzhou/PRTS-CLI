@@ -68,7 +68,7 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
     if skill:
         output.append(tabulate_skill(oprt, skill, rank, upgrade))
 
-    if module in range(3):
+    if module in range(1, 3):
         if '模组' in oprt:
             output.append(tabulate_module(oprt))
         else:
