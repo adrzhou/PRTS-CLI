@@ -1,5 +1,6 @@
 import click
 import pathlib
+import tomli_w
 from tabulate import tabulate
 from utils.loader import load_oprt
 from utils.colorize import colorize
@@ -40,7 +41,9 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
         return
 
     # If user only provides the operator argument
-    everything = not (general or attr or talent or skill or elite or module)
+    everything = not (general or attr or talent or skill
+                      or (elite not in range(2))
+                      or (module not in range(3)))
     if everything:
         # TODO: print everything
         pass
@@ -59,77 +62,17 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
     if potential:
         output.append(tabulate_potential(oprt))
 
-    if elite in (0, 1, 2):
+    if elite in range(2):
         output.append(tabulate_elite(oprt, elite, upgrade))
 
     if skill:
-        kanji = {1: '一', 2: '二', 3: '三'}
-        section = output['技能'] = {}
-        if 0 in skill:
-            if oprt['干员信息']['稀有度'] in '01':
-                click.echo('一星和二星干员无技能')
-                del output['技能']
-            for sk in kanji.values():
-                try:
-                    section[f'{sk}'] = oprt[f'{sk}技能']
-                except KeyError:
-                    continue
-        else:
-            for sk in set(skill):
-                if sk < 1:
-                    continue
-                if sk > 3:
-                    break
-                if 0 in rank:
-                    try:
-                        section[f'{kanji[sk]}技能'] = oprt[f'{kanji[sk]}技能']
-                    except KeyError:
-                        click.echo(f'该干员没有{kanji[sk]}技能')
-                        break
-                else:
-                    section[f'{kanji[sk]}'] = {}
-                    for r in set(rank):
-                        if r < 1:
-                            continue
-                        if r > 10:
-                            break
-                        try:
-                            section[f'{kanji[sk]}'][str(r)] = oprt[f'{kanji[sk]}技能'][str(r)]
-                        except KeyError:
-                            click.echo('该干员技能等级最高为7')
-                            rank = [i for i in rank if 0 < i < 8]
-                            break
-        if upgrade:
-            for sk, ranks in section.items():
-                if upgrade == 'upgrade_only':
-                    try:
-                        del section[sk]['1']
-                    except KeyError:
-                        pass
-                for r in tuple(ranks):
-                    if upgrade == 'upgrade_only':
-                        try:
-                            section[sk][r].clear()
-                        except AttributeError:
-                            del section[sk][r]
-                            continue
-                    try:
-                        int(r)
-                    except ValueError:
-                        continue
-                    if 1 < int(r) < 8:
-                        section[sk][r]['升级材料'] = oprt['技能升级材料'][str(r)]
-                    elif int(r) > 7:
-                        section[sk][r]['升级材料'] = oprt['技能升级材料'][f'{sk[0]}{r}']
-                    else:
-                        pass
+        output.append(tabulate_skill(oprt, skill, rank, upgrade))
 
-    if module:
-        output['模组'] = {k: v for k, v in oprt['模组'].items() if not k.startswith('材料消耗')}
-        if upgrade:
-            if upgrade == 'upgrade_only':
-                output['模组'].clear()
-            output['模组'].update({k: v for k, v in oprt['模组'].items() if k.startswith('材料消耗')})
+    if module in range(3):
+        if '模组' in oprt:
+            output.append(tabulate_module(oprt))
+        else:
+            click.echo('该干员未开放模组系统')
 
     if pager:
         click.echo_via_pager('\n\n'.join(output))
@@ -179,7 +122,7 @@ def tabulate_talent(oprt: dict):
         if len(key) == 5:
             if value not in talents:
                 talents[value] = []
-            condition = talent[key+'条件']
+            condition = talent[key + '条件']
             effect = talent[key + '效果']
             talents[value].append([condition, effect])
 
@@ -239,3 +182,124 @@ def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
 
     return table
 
+
+def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
+    kanji = {1: '一', 2: '二', 3: '三'}
+    rarity = oprt['干员信息']['稀有度']
+
+    # If user does not specify skill
+    if 0 in skill:
+        if rarity < 3:
+            click.echo('一星和二星干员无技能')
+            return
+
+        output = []
+        for sk in kanji.values():
+            try:
+                sk = oprt[f'{sk}技能']
+                name = sk['技能名']
+                type1 = sk['技能类型1']
+                type2 = sk['技能类型2']
+                header = ['等级', '描述', '初始', '消耗', '持续']
+                rows = []
+                for rk in range(1, 8):
+                    value = sk[str(rk)]
+                    row = [value[k] for k in header[1:]]
+                    row = [rk] + row
+                    rows.append(row)
+                if rarity > 3:
+                    for rk in (8, 9, 10):
+                        value = sk[str(rk)]
+                        row = [value[k] for k in header[1:]]
+                        row = [rk] + row
+                        rows.append(row)
+                table = tabulate(rows, headers=header, tablefmt='github')
+                output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
+            except KeyError:
+                continue
+
+        if upgrade:
+            output.append('技能升级材料')
+            if upgrade == 'upgrade_only':
+                output.clear()
+            for rk, value in oprt['技能升级材料'].items():
+                rows = [[k, v] for k, v in value.items()]
+                table = tabulate(rows, tablefmt='github')
+                table = colorize(table)
+                output.append(f'{rk}\n{table}')
+
+        return '\n\n'.join(output)
+
+    # If user does specify skill
+    else:
+        output = []
+        for sk in set(skill).intersection({1, 2, 3}):
+            try:
+                sk = oprt[f'{kanji[sk]}技能']
+            except KeyError:
+                click.echo(f'该干员没有{kanji[sk]}技能')
+                continue
+
+            name = sk['技能名']
+            type1 = sk['技能类型1']
+            type2 = sk['技能类型2']
+            header = ['等级', '描述', '初始', '消耗', '持续']
+            rows = []
+
+            # If user does not specify rank
+            if 0 in rank:
+                for rk in range(1, 8):
+                    value = sk[str(rk)]
+                    row = [value[k] for k in header[1:]]
+                    row = [rk] + row
+                    rows.append(row)
+                if rarity > 3:
+                    for rk in (8, 9, 10):
+                        value = sk[str(rk)]
+                        row = [value[k] for k in header[1:]]
+                        row = [rk] + row
+                        rows.append(row)
+
+            # If user does specify rank
+            else:
+                for rk in set(rank).intersection(set(range(1, 11))):
+                    if rk < 1:
+                        continue
+                    if rk > 10:
+                        break
+                    try:
+                        value = sk[str(rk)]
+                    except KeyError:
+                        click.echo('该干员技能等级最高为7')
+                        break
+                    row = [value[k] for k in header[1:]]
+                    row = [rk] + row
+                    rows.append(row)
+
+            table = tabulate(rows, headers=header, tablefmt='github')
+            output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
+
+        if upgrade:
+            if upgrade == 'upgrade_only':
+                output.clear()
+            for rk in set(rank).intersection(set(range(2, 8))):
+                req = oprt['技能升级材料'][str(rank)]
+                rows = [[k, v] for k, v in req.items()]
+                table = tabulate(rows, tablefmt='github')
+                table = colorize(table)
+                output.append(f'{rk}\n{table}')
+            for sk in set(skill).intersection({1, 2, 3}):
+                for rk in set(rank).intersection({8, 9, 10}):
+                    req = oprt['技能升级材料'][f'{kanji[sk]}{rk}']
+                    rows = [[k, v] for k, v in req.items()]
+                    table = tabulate(rows, tablefmt='github')
+                    table = colorize(table)
+                    output.append(f'{kanji[sk]}{rk}\n{table}')
+
+        return '\n\n'.join(output)
+
+
+def tabulate_module(oprt: dict):
+    # TODO: Implement this function
+    data = oprt['模组']
+    return tomli_w.dumps(data).replace('"', '')
