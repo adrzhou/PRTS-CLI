@@ -2,6 +2,7 @@ import click
 import pathlib
 import tomli
 import tomli_w
+from tabulate import tabulate
 from utils.loader import load_oprt
 
 package_path = pathlib.Path(__file__).parents[1]
@@ -27,41 +28,49 @@ def track(operator, elite, rank, skill, module, goal):
 
     # No arguments provided
     if not operator:
-        click.echo(tomli_w.dumps(profile['tracker']).replace('"', ''))
-    else:
-        for op in operator:
-            try:
-                op_dict = load_oprt(op)
-            except KeyError:
-                click.echo(f'未找到名叫或别名为{op}的干员')
-                continue
-            op_name = op_dict['干员信息']['干员名']
-            rarity = int(op_dict['干员信息']['稀有度'])
+        for oprt, tracker in profile['tracker'].items():
+            status = tracker['目前']
+            goal = tracker['目标']
+            header = [oprt, '目前', '目标']
+            rows = [[key, status[key], goal[key]] for key in status]
+            table = tabulate(rows, headers=header, tablefmt='github')
+            click.echo(table)
+            click.echo('\n')
+        return
 
-            # Operator already tracked
-            if op_name in profile['tracker'].keys():
-                output = profile['tracker'][op_name]
+    # At least one operator provided
+    for op in operator:
+        try:
+            oprt = load_oprt(op)
+        except KeyError:
+            click.echo(f'未找到名叫或别名为{op}的干员')
+            continue
+        name = oprt['干员信息']['干员名']
+        rarity = int(oprt['干员信息']['稀有度'])
 
-            # Add new operator to tracking list
-            else:
-                output = profile['tracker'][op_name] = {'目前': {}, '目标': {}}
-                set_init(op_dict, output, rarity)
+        if name not in profile['tracker']:
+            tracker = profile['tracker'][name] = {'目前': {}, '目标': {}}
+            set_init(oprt, tracker, rarity)
+        else:
+            tracker = profile['tracker'][name]
 
-            # No options provided
-            if not (elite in (0, 1, 2) or rank or module in (0, 1, 2, 3)):
-                click.echo(op_name)
-                click.echo(tomli_w.dumps(output).replace('"', ''))
+        if elite in range(3):
+            set_elite(goal, elite, rarity, name, tracker)
+        if rank:
+            set_rank(goal, rank, skill, rarity, name, tracker)
+        if module in range(4):
+            set_module(goal, tracker, module)
 
-            # At least one option provided
-            else:
-                if elite in range(3):
-                    set_elite(goal, elite, rarity, op_name, output)
-                if rank:
-                    set_rank(goal, rank, skill, rarity, op_name, output)
-                if module in range(4):
-                    set_module(goal, output, module)
-            with open(profile_path, 'wb') as pro_file:
-                tomli_w.dump(profile, pro_file)
+        status = tracker['目前']
+        goal = tracker['目标']
+        header = [name, '目前', '目标']
+        rows = [[key, status[key], goal[key]] for key in status]
+        table = tabulate(rows, headers=header, tablefmt='github')
+        click.echo(table)
+        click.echo('\n')
+
+    with open(profile_path, 'wb') as pro_file:
+        tomli_w.dump(profile, pro_file)
 
 
 @click.command(no_args_is_help=True)
@@ -77,11 +86,11 @@ def untrack(operator, all_):
     else:
         for op in operator:
             try:
-                op_dict = load_oprt(op)
+                oprt = load_oprt(op)
             except KeyError:
                 click.echo(f'未找到名叫或别名为{op}的干员')
                 continue
-            op_name = op_dict['干员信息']['干员名']
+            op_name = oprt['干员信息']['干员名']
             del profile['tracker'][op_name]
     with open(profile_path, 'wb') as pro_file:
         tomli_w.dump(profile, pro_file)
@@ -187,7 +196,7 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, op_name: str, outpu
             return
         output['目前'][skill] = rank
         if rank > 7:
-            output['目前']['精英'] = 1
+            output['目前']['精英'] = 2
     elif rank:
         if rarity == 2 and rank > 7:
             click.echo(f'干员{op_name}无法专精技能')
