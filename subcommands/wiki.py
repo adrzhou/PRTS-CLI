@@ -2,6 +2,7 @@ import click
 import pathlib
 from tabulate import tabulate
 from utils.loader import load_oprt
+from utils.colorize import colorize
 
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('config.toml')
@@ -59,22 +60,7 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
         output.append(tabulate_potential(oprt))
 
     if elite in (0, 1, 2):
-        section = output[f'精英{elite}'] = {}
-        section['部署费用'] = oprt['属性']['部署费用']
-        section['阻挡数'] = oprt['属性']['阻挡数']
-        for key, value in oprt['属性'].items():
-            if key.startswith(f'精英{elite}'):
-                section[key] = value
-        if upgrade:
-            if upgrade == 'upgrade_only':
-                section.clear()
-            if elite == 0:
-                click.echo('晋升至精英0不需要精英化材料')
-            else:
-                try:
-                    section['精英化材料'] = oprt['精英化材料'][f'精{elite}']
-                except KeyError:
-                    click.echo(f'该干员无法晋升至精英{elite}')
+        output.append(tabulate_elite(oprt, elite, upgrade))
 
     if skill:
         kanji = {1: '一', 2: '二', 3: '三'}
@@ -211,3 +197,37 @@ def tabulate_potential(oprt: dict):
     for key, value in oprt['潜能提升'].items():
         rows.append([key, value])
     return tabulate(rows, headers=header, tablefmt='github')
+
+
+def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
+    attr = oprt['属性']
+    header = [f'精英{elite}_满级', '']
+    rows = []
+
+    for key in ('部署费用', '阻挡数'):
+        rows.append([key, attr[key]])
+    for key in ('生命上限', '攻击', '防御', '法术抗性'):
+        f_key = f'精英{elite}_满级_{key}'
+        rows.append([key, attr[f_key]])
+    table = tabulate(rows, headers=header, tablefmt='github')
+
+    if upgrade:
+        upgrade_table = ''
+        if elite == 0:
+            click.echo('晋升至精英0不需要精英化材料')
+        else:
+            header = [f'精{elite}材料', '数量']
+            try:
+                require = oprt['精英化材料'][f'精{elite}']
+                rows = [[mtrl, amount] for mtrl, amount in require.items()]
+                upgrade_table = tabulate(rows, headers=header, tablefmt='github')
+                upgrade_table = colorize(upgrade_table)
+            except KeyError:
+                click.echo(f'该干员无法晋升至精英{elite}')
+
+        if upgrade == 'upgrade_only':
+            return upgrade_table
+        return f'{table}\n\n{upgrade_table}'
+
+    return table
+
