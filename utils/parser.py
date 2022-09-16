@@ -63,41 +63,7 @@ def parse(source: str) -> dict:
 
     parse_elite_mtrl(source, '精2', oprt)
     parse_skill(source, '二技能', oprt)
-
-    # 解析干员模组信息
-    def parse_module():
-        begin = source.index('{{模组')
-        begin = source.index('{{模组', begin + 4)
-        end = source.index('\n}}', begin)
-        module_text = source[begin:end]
-        oprt['模组'] = {}
-        for attr in module_text.split('\n'):
-            pair = attr.split('=')
-            try:
-                v = try_int(pair[1])
-            except IndexError:
-                continue
-            k = pair[0].lstrip('|')
-            oprt['模组'][k] = v
-        for attr in ('类型颜色', '特性追加', '基础信息'):
-            try:
-                del oprt['模组'][attr]
-            except KeyError:
-                continue
-        for level in ("材料消耗", "材料消耗2", "材料消耗3"):
-            materials = oprt['模组'][level].split(' ')
-            oprt['模组'][level] = {}
-            for item in materials:
-                k = item.split('|')[1]
-                v = item.split('|')[2].rstrip('}')
-                oprt['模组'][level][k] = try_int(v)
-
-    try:
-        parse_module()
-    except ValueError:
-        pass
-
-    # TODO: Parse operators with multiple modules
+    parse_module(source, oprt)
 
     if rarity in '34':
         return oprt
@@ -247,3 +213,39 @@ def parse_elite_mtrl(source: str, stage: str, oprt: dict):
         k = item.split('|')[1]
         v = item.split('|')[2].rstrip('}')
         data[k] = try_int(v)
+
+
+def parse_module(source: str, oprt: dict) -> None:
+    if '==模组==' not in source:
+        return
+    module = oprt['模组'] = {}
+    start = source.index('{{模组')
+    end = source.index('\n}}', start)
+
+    while True:
+        try:
+            start = source.index('{{模组', end)
+        except ValueError:
+            break
+        a_module = {}
+        end = source.index('\n}}', start)
+        module_source = source[start:end]
+        for line in module_source.split('\n'):
+            pair = line.split('=')
+            try:
+                v = try_int(pair[1])
+            except IndexError:
+                continue
+            k = pair[0].lstrip('|')
+            a_module[k] = v
+        for k in ('类型颜色', '特性追加', '基础信息'):
+            a_module.pop(k, None)
+        for level in ('材料消耗', '材料消耗2', '材料消耗3'):
+            materials = a_module[level].split(' ')
+            a_module[level] = {}
+            for mtrl in materials:
+                k = mtrl.split('|')[1]
+                v = mtrl.split('|')[2].rstrip('}')
+                a_module[level][k] = try_int(v)
+        name = a_module['名称']
+        module[name] = a_module
