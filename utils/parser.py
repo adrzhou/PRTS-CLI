@@ -218,6 +218,9 @@ def parse_skill(source: str, skill: str, oprt: dict) -> None:
 
 
 def parse_rank_mtrl(source: str, oprt: dict):
+    start = source.index('技能升级材料')
+    end = source.index('\n}}', start)
+    section = source[start:end+1]
     rank_mtrl = oprt['技能升级材料'] = {}
     rarity = oprt['干员信息']['稀有度']
     levels = '2 3 4 5 6 7'.split()
@@ -227,7 +230,7 @@ def parse_rank_mtrl(source: str, oprt: dict):
         levels.extend(('三8', '三9', '三10'))
     for level in levels:
         data = rank_mtrl[level] = {}
-        items = re.search(rf'\|{level}=(.*)\n', source).group(1).split()
+        items = re.search(rf'\|{level}=(.*)\n', section).group(1).split()
         for item in items:
             k = item.split('|')[1]
             v = item.split('|')[2].rstrip('}')
@@ -235,8 +238,11 @@ def parse_rank_mtrl(source: str, oprt: dict):
 
 
 def parse_elite_mtrl(source: str, stage: str, oprt: dict):
+    start = source.index('精英化材料')
+    end = source.index('\n}}', start)
+    section = source[start:end + 1]
     data = oprt['精英化材料'][stage] = {}
-    items = re.search(rf'\|{stage}=(.*)\n', source).group(1).split(' ')
+    items = re.search(rf'\|{stage}=(.*)\n', section).group(1).split(' ')
     for item in items:
         k = item.split('|')[1]
         v = item.split('|')[2].rstrip('}')
