@@ -124,7 +124,7 @@ def set_init(oprt: dict, tracker: dict, rarity: int) -> None:
             idx += 1
 
 
-def set_elite(goal: bool, elite: int, rarity: int, op_name: str, output: dict) -> None:
+def set_elite(goal: bool, elite: int, rarity: int, op_name: str, tracker: dict) -> None:
     """Helper for setting an operator's elite level"""
 
     if rarity < 2 or (rarity < 3 and elite == 2):
@@ -132,38 +132,40 @@ def set_elite(goal: bool, elite: int, rarity: int, op_name: str, output: dict) -
         return
 
     if goal:
-        output['目标']['精英'] = elite
+        tracker['目标']['精英'] = elite
         # 精英0的干员技能等级不大于4且未解锁模组
         if elite == 0:
-            for k, v in output['目标'].items():
+            for k, v in tracker['目标'].items():
                 if k.endswith('技能') and v > 4:
-                    output['目标'][k] = 4
-            if '模组' in output['目标'].keys():
-                output['目标']['模组'] = 0
+                    tracker['目标'][k] = 4
+            if '模组' in tracker:
+                for mdl in tracker['模组'].values():
+                    tracker['目标'][mdl] = 0
         # 精英1的干员技能等级不大于7且未解锁模组
         elif elite == 1:
-            for k, v in output['目标'].items():
+            for k, v in tracker['目标'].items():
                 if k.endswith('技能') and v > 7:
-                    output['目标'][k] = 7
-            if '模组' in output['目标'].keys():
-                output['目标']['模组'] = 0
+                    tracker['目标'][k] = 7
+            if '模组' in tracker:
+                for mdl in tracker['模组'].values():
+                    tracker['目标'][mdl] = 0
         return
 
-    output['目前']['精英'] = elite
+    tracker['目前']['精英'] = elite
     # 精英0的干员技能等级不大于4且未解锁模组
     if elite == 0:
-        for k, v in output['目前'].items():
+        for k, v in tracker['目前'].items():
             if k.endswith('技能') and v > 4:
-                output['目前'][k] = 4
-        if '模组' in output['目前'].keys():
-            output['目前']['模组'] = 0
+                tracker['目前'][k] = 4
+        if '模组' in tracker['目前'].keys():
+            tracker['目前']['模组'] = 0
     # 精英1的干员技能等级不大于7且未解锁模组
     elif elite == 1:
-        for k, v in output['目前'].items():
+        for k, v in tracker['目前'].items():
             if k.endswith('技能') and v > 7:
-                output['目前'][k] = 7
-        if '模组' in output['目前'].keys():
-            output['模组'] = 0
+                tracker['目前'][k] = 7
+        if '模组' in tracker['目前'].keys():
+            tracker['模组'] = 0
 
 
 def set_rank(goal: bool, rank: int, skill: int, rarity: int, op_name: str, output: dict) -> None:
