@@ -49,7 +49,7 @@ def track(operator, elite, rank, skill, module, goal):
         rarity = int(oprt['干员信息']['稀有度'])
 
         if name not in profile['tracker']:
-            tracker = profile['tracker'][name] = {'目前': {}, '目标': {}}
+            tracker = profile['tracker'][name] = {'目前': {}, '目标': {}, '模组': {}}
             set_init(oprt, tracker, rarity)
         else:
             tracker = profile['tracker'][name]
@@ -96,24 +96,32 @@ def untrack(operator, all_):
         tomli_w.dump(profile, pro_file)
 
 
-def set_init(op_dict: dict, output: dict, rarity: int) -> None:
+def set_init(oprt: dict, tracker: dict, rarity: int) -> None:
     """Helper for initializing a tracked operator"""
 
+    status = tracker['目前']
+    goal = tracker['目标']
+    module = tracker['模组']
+
     if rarity > 1:
-        output['目前']['精英'] = 0
-        output['目前']['一技能'] = 1
-        output['目标']['精英'] = 1
-        output['目标']['一技能'] = 7
+        status['精英'] = 0
+        status['一技能'] = 1
+        goal['精英'] = 1
+        goal['一技能'] = 7
     if rarity > 2:
-        output['目前']['二技能'] = 1
-        output['目标']['精英'] = 2
-        output['目标']['二技能'] = 7
+        status['二技能'] = 1
+        goal['精英'] = 2
+        goal['二技能'] = 7
     if rarity == 5:
-        output['目前']['三技能'] = 1
-        output['目标']['三技能'] = 7
-    if '模组' in op_dict.keys():
-        output['目前']['模组'] = 0
-        output['目标']['模组'] = 3
+        status['三技能'] = 1
+        goal['三技能'] = 7
+    if '模组' in oprt:
+        idx = 1
+        for mdl in oprt['模组']:
+            status[mdl] = 0
+            goal[mdl] = 3
+            module[str(idx)] = mdl
+            idx += 1
 
 
 def set_elite(goal: bool, elite: int, rarity: int, op_name: str, output: dict) -> None:
