@@ -345,6 +345,7 @@ def tabulate_module(oprt: dict, upgrade: str):
                 header = ('材料', '数量')
                 rows = [[k, v] for k, v in req.items()]
                 table = tabulate(rows, headers=header, tablefmt='pretty')
+                table = colorize(table)
                 output.append(f'{key}\n{table}')
 
     return '\n\n'.join(output)
