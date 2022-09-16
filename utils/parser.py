@@ -7,7 +7,43 @@ def parse(source: str) -> dict:
     # Curtail source length to reduce workload of re.sub
     source = source[:source.index('==相关道具==')]
 
-    clean(source)
+    # Substitute HTML line breaks with colons
+    source = re.sub(re.compile(r'<br/>'), ' ', source)
+
+    # Remove HTML tags and other annotations from source
+    tags = ('<ref.*?ref>', '<.*?>', '&lt;', '&gt;', '{{±.*?}}', r'\[\[关卡一览.*?\]\]',
+            '{{攻击范围.*?}}', r'{{fa\|plus-circle\|color.*?}}')
+    for tag in tags:
+        source = re.sub(re.compile(tag), '', source)
+
+    # Remove style notations from source
+    # DO NOT ATTEMPT TO OPTIMIZE THIS PART OF CODE
+    # IT WILL STOP WORKING IF REFACTORED AS AN OUTER FUNCTION
+    def extract(match):
+        pattern = match.re.pattern
+        if pattern in (r'{{color\|.*?}}', r'{{color\|.*?}}', r'{{\*\|.*?}}', r'{{\*\*\|.*?}}',
+                       r'{{\+\|.*?}}', r'{{术语\|.*?}}', r'{{\+\+\|.*?}}'):
+            return re.search(r'\|.*?\|(.*?)}}', match.group(0)).group(1)
+        elif pattern == r'{{变动数值lite\|.*?\|蓝\|.*?}}':
+            return re.search(r'\|蓝\|(.*?)}}', match.group(0)).group(1)
+        elif pattern == r'{{变动数值lite\|\|橙\|.*?}}':
+            return re.search(r'\|橙\|(.*?)}}', match.group(0)).group(1)
+        elif pattern == '{{修正.*?}}':
+            return re.search(r'{{修正\|(.*?)\|.*?}}', match.group(0)).group(1)
+
+    notations = (r'{{color\|.*?}}',
+                 r'{{color\|.*?}}',
+                 r'{{\*\|.*?}}',
+                 r'{{\*\*\|.*?}}',
+                 r'{{\+\|.*?}}',
+                 r'{{术语\|.*?}}',
+                 r'{{\+\+\|.*?}}',
+                 r'{{变动数值lite\|.*?\|蓝\|.*?}}',
+                 r'{{变动数值lite\|\|橙\|.*?}}', '{{修正.*?}}')
+
+    for notation in notations:
+        source = re.sub(notation, extract, source)
+
     parse_general(source, oprt)
     parse_attr(source, oprt)
     parse_talent(source, oprt)
@@ -75,44 +111,6 @@ def try_int(string):
         return int(string)
     except ValueError:
         return string
-
-
-def extract(match):
-    pattern = match.re.pattern
-    if pattern in (r'{{color\|.*?}}', r'{{color\|.*?}}', r'{{\*\|.*?}}', r'{{\*\*\|.*?}}',
-                   r'{{\+\|.*?}}', r'{{术语\|.*?}}', r'{{\+\+\|.*?}}'):
-        return re.search(r'\|.*?\|(.*?)}}', match.group(0)).group(1)
-    elif pattern == r'{{变动数值lite\|.*?\|蓝\|.*?}}':
-        return re.search(r'\|蓝\|(.*?)}}', match.group(0)).group(1)
-    elif pattern == r'{{变动数值lite\|\|橙\|.*?}}':
-        return re.search(r'\|橙\|(.*?)}}', match.group(0)).group(1)
-    elif pattern == '{{修正.*?}}':
-        return re.search(r'{{修正\|(.*?)\|.*?}}', match.group(0)).group(1)
-
-
-def clean(source):
-    # Substitute HTML line breaks with spaces
-    source = re.sub(re.compile(r'<br/>'), ' ', source)
-
-    # Remove HTML tags and other annotations from source
-    tags = ('<ref.*?ref>', '<.*?>', '&lt;', '&gt;', '{{±.*?}}', r'\[\[关卡一览.*?\]\]',
-            '{{攻击范围.*?}}', r'{{fa\|plus-circle\|color.*?}}')
-    for tag in tags:
-        source = re.sub(re.compile(tag), '', source)
-
-    # Remove style notations from source
-    notations = (r'{{color\|.*?}}',
-                 r'{{color\|.*?}}',
-                 r'{{\*\|.*?}}',
-                 r'{{\*\*\|.*?}}',
-                 r'{{\+\|.*?}}',
-                 r'{{术语\|.*?}}',
-                 r'{{\+\+\|.*?}}',
-                 r'{{变动数值lite\|.*?\|蓝\|.*?}}',
-                 r'{{变动数值lite\|\|橙\|.*?}}', '{{修正.*?}}')
-
-    for notation in notations:
-        source = re.sub(notation, extract, source)
 
 
 def parse_general(source: str, oprt: dict) -> None:
