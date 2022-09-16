@@ -18,7 +18,7 @@ kanji = {1: '一', 2: '二', 3: '三'}
 @click.option('-e', '--elite', 'elite', type=click.IntRange(0, 2), help='设置干员精英等级')
 @click.option('-r', '--rank', 'rank', type=click.IntRange(1, 10), help='设置干员技能等级')
 @click.option('-s', '--skill', 'skill', type=click.IntRange(1, 3), help='设置干员特定技能的专精等级')
-@click.option('-m', '--module', 'module', type=click.IntRange(0, 3), help='设置干员模组阶段')
+@click.option('-m', '--module', 'module', type=int, help='设置干员模组阶段')
 @click.option('-g', '--goal', 'goal', is_flag=True, help='设定干员练度目标')
 def track(operator, elite, rank, skill, module, goal):
     """追踪干员练度与仓库材料"""
@@ -58,8 +58,8 @@ def track(operator, elite, rank, skill, module, goal):
             set_elite(goal, elite, rarity, name, tracker)
         if rank:
             set_rank(goal, rank, skill, rarity, name, tracker)
-        if module in range(4):
-            set_module(goal, tracker, module)
+        if module:
+            set_module(goal, module, name, tracker)
 
         status = tracker['目前']
         goal = tracker['目标']
@@ -124,11 +124,11 @@ def set_init(oprt: dict, tracker: dict, rarity: int) -> None:
             idx += 1
 
 
-def set_elite(goal: bool, elite: int, rarity: int, op_name: str, tracker: dict) -> None:
+def set_elite(goal: bool, elite: int, rarity: int, name: str, tracker: dict) -> None:
     """Helper for setting an operator's elite level"""
 
     if rarity < 2 or (rarity < 3 and elite == 2):
-        click.echo(f'干员{op_name}无法晋升至精英{elite}')
+        click.echo(f'干员{name}无法晋升至精英{elite}')
         return
 
     if goal:
@@ -168,77 +168,89 @@ def set_elite(goal: bool, elite: int, rarity: int, op_name: str, tracker: dict) 
             tracker['模组'] = 0
 
 
-def set_rank(goal: bool, rank: int, skill: int, rarity: int, op_name: str, output: dict) -> None:
+def set_rank(goal: bool, rank: int, skill: int, rarity: int, name: str, tracker: dict) -> None:
     """Helper for setting an operator's skill rank"""
 
     if rarity < 2:
-        click.echo(f'干员{op_name}无法提升技能等级')
+        click.echo(f'干员{name}无法提升技能等级')
         return
     if rank and skill:
         if rarity == 2 and rank > 7:
-            click.echo(f'干员{op_name}无法专精技能')
+            click.echo(f'干员{name}无法专精技能')
             return
         if rarity == skill == 2:
-            click.echo(f'干员{op_name}没有二技能')
+            click.echo(f'干员{name}没有二技能')
             return
         if rarity < 5 and skill == 3:
-            click.echo(f'干员{op_name}没有三技能')
+            click.echo(f'干员{name}没有三技能')
             return
         skill = f'{kanji[skill]}技能'
         if rank in range(1, 8):
             if goal:
-                for k, v in output['目标'].items():
+                for k, v in tracker['目标'].items():
                     if k.endswith('技能'):
-                        output['目标'][k] = rank
+                        tracker['目标'][k] = rank
                 if rank > 4:
-                    output['目标']['精英'] = 1
+                    tracker['目标']['精英'] = 1
                 return
-            for k, v in output['目前'].items():
+            for k, v in tracker['目前'].items():
                 if k.endswith('技能'):
-                    output['目前'][k] = rank
+                    tracker['目前'][k] = rank
             if rank > 4:
-                output['目前']['精英'] = 1
+                tracker['目前']['精英'] = 1
             return
         if goal:
-            output['目标'][skill] = rank
+            tracker['目标'][skill] = rank
             if rank > 7:
-                output['目标']['精英'] = 2
+                tracker['目标']['精英'] = 2
             return
-        output['目前'][skill] = rank
+        tracker['目前'][skill] = rank
         if rank > 7:
-            output['目前']['精英'] = 2
+            tracker['目前']['精英'] = 2
     elif rank:
         if rarity == 2 and rank > 7:
-            click.echo(f'干员{op_name}无法专精技能')
+            click.echo(f'干员{name}无法专精技能')
             return
         if goal:
-            for k, v in output['目标'].items():
+            for k, v in tracker['目标'].items():
                 if k.endswith('技能'):
-                    output['目标'][k] = rank
+                    tracker['目标'][k] = rank
             if rank > 4:
-                output['目标']['精英'] = 1
+                tracker['目标']['精英'] = 1
             if rank > 7:
-                output['目标']['精英'] = 2
+                tracker['目标']['精英'] = 2
             return
-        for k, v in output['目前'].items():
+        for k, v in tracker['目前'].items():
             if k.endswith('技能'):
-                output['目前'][k] = rank
+                tracker['目前'][k] = rank
         if rank > 4:
-            output['目前']['精英'] = 1
+            tracker['目前']['精英'] = 1
         if rank > 7:
-            output['目前']['精英'] = 2
+            tracker['目前']['精英'] = 2
         return
 
 
-def set_module(goal: bool, output: dict, module: int) -> None:
+def set_module(goal: bool, module: int, name: str, tracker: dict) -> None:
     """Helper for setting an operator's module phase"""
 
-    if '模组' in output['目标'].keys():
-        if goal:
-            output['目标']['模组'] = module
-            if module in range(1, 4):
-                output['目标']['精英'] = 2
+    if '模组' in tracker:
+        if module not in (0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23):
+            module = click.prompt('模组等级无效 请重新输入: ')
+            set_module(goal, module, name, tracker)
+            return
+        if module > 13 and len(tracker['模组']) == 1:
+            click.echo(f'干员{name}未实装第二模组')
+            return
+        if module < 20:
+            mdl = tracker['模组']['1']
         else:
-            output['目前']['模组'] = module
-            if module in range(1, 4):
-                output['目前']['精英'] = 2
+            mdl = tracker['模组']['2']
+        level = module % 10
+        if goal:
+            tracker['目标'][mdl] = level
+            if level in range(1, 4):
+                tracker['目标']['精英'] = 2
+        else:
+            tracker['目前'][mdl] = level
+            if level in range(1, 4):
+                tracker['目前']['精英'] = 2
