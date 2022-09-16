@@ -7,8 +7,8 @@ from parser import parse
 package_path = pathlib.Path(__file__).parents[1]
 source_path = package_path.joinpath('temp')
 data_path = package_path.joinpath('data')
-catalog_path = package_path.joinpath('catalog.toml')
-names_path = package_path.joinpath('reserved_names.toml')
+catalog_path = package_path.joinpath('usr', 'catalog.toml')
+names_path = package_path.joinpath('usr', 'reserved_names.toml')
 
 with open(catalog_path, 'rb') as catalog_file:
     catalog: dict = tomli.load(catalog_file)

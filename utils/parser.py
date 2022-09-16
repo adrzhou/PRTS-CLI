@@ -145,7 +145,7 @@ def parse_attr(source: str, oprt: dict) -> None:
 
     for k in ('潜能', '潜能类型', '初始模组名', '模组1名',
               '模组1数据', '模组2名', '模组2数据'):
-        attr.pop(k)
+        attr.pop(k, None)
 
 
 def parse_talent(source: str, oprt: dict) -> None:
@@ -164,13 +164,16 @@ def parse_talent(source: str, oprt: dict) -> None:
         k = pair[0].lstrip('|')
         talent[k] = v
 
-    talent.pop('备注')
+    talent.pop('备注', None)
 
 
 def parse_potential(source: str, oprt: dict) -> None:
     potential = oprt['潜能提升'] = {}
 
-    start = source.index('{{潜能提升')
+    try:
+        start = source.index('{{潜能提升')
+    except ValueError:
+        return
     end = source.index('\n}}', start)
     section = source[start:end]
 
