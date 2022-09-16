@@ -1,6 +1,5 @@
 import click
 import pathlib
-import tomli_w
 from tabulate import tabulate
 from utils.loader import load_oprt
 from utils.colorize import colorize
@@ -39,39 +38,44 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
         click.echo(f'未找到名叫或别名为{operator}的干员')
         return
 
+    output = []
+
     # If user only provides the operator argument
     everything = not (general or attr or talent or skill
                       or (elite in range(3))
                       or module)
     if everything:
-        # TODO: print everything
-        pass
-
-    output = []
-
-    if general:
         output.append(tabulate_general(oprt))
-
-    if attr:
         output.append(tabulate_attr(oprt))
-
-    if talent:
         output.append(tabulate_talent(oprt))
-
-    if potential:
-        output.append(tabulate_potential(oprt))
-
-    if elite in range(3):
-        output.append(tabulate_elite(oprt, elite, upgrade))
-
-    if skill:
-        output.append(tabulate_skill(oprt, skill, rank, upgrade))
-
-    if module:
+        output.append(tabulate_skill(oprt, (0,), rank, upgrade))
         if '模组' in oprt:
-            output.append(tabulate_module(oprt))
-        else:
-            click.echo('该干员未开放模组系统')
+            output.append(tabulate_module(oprt, upgrade))
+
+    else:
+        if general:
+            output.append(tabulate_general(oprt))
+
+        if attr:
+            output.append(tabulate_attr(oprt))
+
+        if talent:
+            output.append(tabulate_talent(oprt))
+
+        if potential:
+            output.append(tabulate_potential(oprt))
+
+        if elite in range(3):
+            output.append(tabulate_elite(oprt, elite, upgrade))
+
+        if skill:
+            output.append(tabulate_skill(oprt, skill, rank, upgrade))
+
+        if module:
+            if '模组' in oprt:
+                output.append(tabulate_module(oprt, upgrade))
+            else:
+                click.echo('该干员未开放模组系统')
 
     if pager:
         click.echo_via_pager('\n\n'.join(output))
@@ -161,6 +165,16 @@ def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
         rows.append([key, attr[f_key]])
     table = tabulate(rows, headers=header, tablefmt='github')
 
+    talent = oprt['天赋']
+    header = ['天赋', '条件', '效果']
+    rows = []
+    for key, value in talent.items():
+        if f'精英{elite}' in value:
+            effect = talent[f'{key[:-2]}效果']
+            row = [key[:4], value, effect]
+            rows.append(row)
+    talent_table = tabulate(rows, headers=header, tablefmt='github')
+
     if upgrade:
         upgrade_table = ''
         if elite == 0:
@@ -177,9 +191,9 @@ def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
 
         if upgrade == 'upgrade_only':
             return upgrade_table
-        return f'{table}\n\n{upgrade_table}'
+        return f'{table}\n\n{talent_table}\n\n{upgrade_table}'
 
-    return table
+    return f'{table}\n\n{talent_table}'
 
 
 def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
@@ -201,17 +215,16 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                 type2 = sk['技能类型2']
                 header = ['等级', '描述', '初始', '消耗', '持续']
                 rows = []
-                for rk in range(1, 8):
-                    value = sk[str(rk)]
-                    row = [value[k] for k in header[1:]]
-                    row = [rk] + row
-                    rows.append(row)
+                value = sk['7']
+                row = [value[k] for k in header[1:]]
+                row = [7] + row
+                rows.append(row)
                 if rarity > 3:
-                    for rk in (8, 9, 10):
-                        value = sk[str(rk)]
-                        row = [value[k] for k in header[1:]]
-                        row = [rk] + row
-                        rows.append(row)
+                    rows.clear()
+                    value = sk['10']
+                    row = [value[k] for k in header[1:]]
+                    row = [10] + row
+                    rows.append(row)
                 table = tabulate(rows, headers=header, tablefmt='github')
                 output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
             except KeyError:
@@ -298,7 +311,40 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
         return '\n\n'.join(output)
 
 
-def tabulate_module(oprt: dict):
-    # TODO: Implement this function
-    data = oprt['模组']
-    return tomli_w.dumps(data).replace('"', '')
+def tabulate_module(oprt: dict, upgrade: str):
+    output = []
+    module = oprt['模组']
+    for name, mdl in module.items():
+        mdl.pop('解锁等级', None)
+        mdl.pop('解锁信赖', None)
+        rows = []
+        for key in ('名称', '类型', '任务1', '任务2'):
+            rows.append([key, mdl.pop(key)])
+        table = tabulate(rows, tablefmt='pretty')
+        output.append(table)
+
+        attrs = [key for key, value in mdl.items() if type(value) is int]
+        cols = {}
+        keys = [key for key in attrs if not (key.endswith('2') or key.endswith('3'))]
+        cols['属性'] = keys
+        cols['等级1'] = [mdl.pop(key, None) for key in keys]
+        cols['等级2'] = [mdl.pop(f'{key}2', None) for key in keys]
+        cols['等级3'] = [mdl.pop(f'{key}3', None) for key in keys]
+        table = tabulate(cols, headers='keys', tablefmt='pretty')
+        output.append(table)
+
+        keys = [key for key in mdl if not key.startswith('材料消耗')]
+        rows = [[key, mdl.pop(key)] for key in keys]
+        table = tabulate(rows, tablefmt='pretty')
+        output.append(table)
+
+        if upgrade:
+            if upgrade == 'upgrade_only':
+                output.clear()
+            for key, req in mdl.items():
+                header = ('材料', '数量')
+                rows = [[k, v] for k, v in req.items()]
+                table = tabulate(rows, headers=header, tablefmt='pretty')
+                output.append(f'{key}\n{table}')
+
+    return '\n\n'.join(output)
