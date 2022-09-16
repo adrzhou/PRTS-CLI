@@ -19,7 +19,8 @@ data_path = package_path.joinpath('data')
 @click.option('-r', '--rank', 'rank', default=[0], multiple=True, type=int, help='查询特定等级的技能')
 @click.option('-u', '--upgrade', 'upgrade', flag_value='upgrade', help='显示技能升级/精英化所需材料')
 @click.option('-U', '--upgrade-only', 'upgrade', flag_value='upgrade_only', help='仅显示技能升级/精英化所需材料')
-@click.option('-e', '--elite', 'elite', is_flag=False, flag_value=2, type=click.IntRange(0, 2),
+@click.option('-e', '--elite', 'elite', type=click.IntRange(0, 2),
+              prompt='请指定要查询的精英等级', prompt_required=False,
               help='查询干员精英化之后的属性数据')
 @click.option('-m', '--module', 'module', is_flag=True, help='查询干员模组')
 @click.argument('operator', nargs=1, required=False)
@@ -40,8 +41,8 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
 
     # If user only provides the operator argument
     everything = not (general or attr or talent or skill
-                      or (elite not in range(2))
-                      or (module not in range(3)))
+                      or (elite in range(3))
+                      or module)
     if everything:
         # TODO: print everything
         pass
@@ -60,13 +61,13 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
     if potential:
         output.append(tabulate_potential(oprt))
 
-    if elite in range(2):
+    if elite in range(3):
         output.append(tabulate_elite(oprt, elite, upgrade))
 
     if skill:
         output.append(tabulate_skill(oprt, skill, rank, upgrade))
 
-    if module in range(1, 3):
+    if module:
         if '模组' in oprt:
             output.append(tabulate_module(oprt))
         else:

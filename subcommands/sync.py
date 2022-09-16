@@ -63,6 +63,7 @@ def sync(subclass, operators):
                 end = source.index(']]')
                 redirect = source[start + 2:end]
                 source = get_source(redirect)
+                source = source.text
 
             oprt_data = parse(source)
             stem = oprt_data['干员信息']['情报编号']
