@@ -91,29 +91,35 @@ def tabulate_general(oprt: dict):
 
 
 def tabulate_attr(oprt: dict):
+    output = []
+
     attr1 = []
     for key in ('再部署', '部署费用', '阻挡数', '攻击速度'):
         value = oprt['属性'][key]
         attr1.append([key, value])
     attr1 = tabulate(attr1, tablefmt='pretty')
+    output.append(attr1)
 
-    attr2 = []
-    attr2_header = ['属性', '精英0 1级', '精英0 满级', '信赖加成']
+    attr2_headers = [('属性', '精英0 1级', '精英0 满级'),
+                     ('属性', '信赖加成')]
     rarity = oprt['干员信息']['稀有度']
     if rarity > 2:
-        attr2_header.insert(-1, '精英1 满级')
+        attr2_headers.insert(-1, ('属性', '精英1 满级'))
     if rarity > 3:
-        attr2_header.insert(-1, '精英2 满级')
-    for attr in ('生命上限', '攻击', '防御', '法术抗性'):
-        row = [attr]
-        for col in attr2_header[1:]:
-            key = col.replace(' ', '_') + '_' + attr
-            value = oprt['属性'].get(key, None)
-            row.append(value)
-        attr2.append(row)
-    attr2 = tabulate(attr2, headers=attr2_header, tablefmt='github')
+        attr2_headers[-2] = ('属性', '精英1 满级', '精英2 满级')
+    for header in attr2_headers:
+        attr2 = []
+        for attr in ('生命上限', '攻击', '防御', '法术抗性'):
+            row = [attr]
+            for col in header[1:]:
+                key = col.replace(' ', '_') + '_' + attr
+                value = oprt['属性'].get(key, None)
+                row.append(value)
+            attr2.append(row)
+        attr2 = tabulate(attr2, headers=header, tablefmt='github')
+        output.append(attr2)
 
-    return f'{attr1}\n\n{attr2}'
+    return '\n\n'.join(output)
 
 
 def tabulate_talent(oprt: dict):
