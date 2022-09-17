@@ -1,11 +1,14 @@
 import click
 import pathlib
+from os import get_terminal_size
 from tabulate import tabulate
 from utils.loader import load_oprt
 from utils.colorize import colorize
 
 package_path = pathlib.Path(__file__).parents[1]
 data_path = package_path.joinpath('data')
+
+columns = get_terminal_size().columns
 
 
 @click.command(no_args_is_help=True)
@@ -48,6 +51,7 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
         output.append(tabulate_general(oprt))
         output.append(tabulate_attr(oprt))
         output.append(tabulate_talent(oprt))
+        output.append(tabulate_potential(oprt))
         output.append(tabulate_skill(oprt, (0,), rank, upgrade))
         if '模组' in oprt:
             output.append(tabulate_module(oprt, upgrade))
@@ -87,7 +91,7 @@ def tabulate_general(oprt: dict):
     general = []
     for key, value in oprt['干员信息'].items():
         general.append([key, value])
-    return tabulate(general, tablefmt='pretty')
+    return tabulate(general, tablefmt='presto', maxcolwidths=[None, columns - 10])
 
 
 def tabulate_attr(oprt: dict):
@@ -137,7 +141,7 @@ def tabulate_talent(oprt: dict):
 
     for t, rows in talents.items():
         header = ['条件', '效果']
-        table = tabulate(rows, headers=header, tablefmt='github')
+        table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, columns - 10])
         output.append(f'{t}\n{table}')
 
     return '\n\n'.join(output)
@@ -179,7 +183,7 @@ def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
             effect = talent[f'{key[:-2]}效果']
             row = [key[:4], value, effect]
             rows.append(row)
-    talent_table = tabulate(rows, headers=header, tablefmt='github')
+    talent_table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, None, columns - 20])
 
     if upgrade:
         upgrade_table = ''
@@ -231,7 +235,8 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                     row = [value[k] for k in header[1:]]
                     row = [10] + row
                     rows.append(row)
-                table = tabulate(rows, headers=header, tablefmt='github')
+                table = tabulate(rows, headers=header, tablefmt='presto',
+                                 maxcolwidths=[None, columns - 20, None, None, None])
                 output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
             except KeyError:
                 continue
@@ -328,7 +333,7 @@ def tabulate_module(oprt: dict, upgrade: str):
         rows = []
         for key in ('名称', '类型', '任务1', '任务2'):
             rows.append([key, mdl.pop(key)])
-        table = tabulate(rows, tablefmt='pretty')
+        table = tabulate(rows, tablefmt='pretty', maxcolwidths=[None, columns - 10])
         output.append(table)
 
         attrs = [key for key, value in mdl.items() if type(value) is int]
@@ -343,7 +348,7 @@ def tabulate_module(oprt: dict, upgrade: str):
 
         keys = [key for key in mdl if not key.startswith('材料消耗')]
         rows = [[key, mdl.pop(key)] for key in keys]
-        table = tabulate(rows, tablefmt='pretty')
+        table = tabulate(rows, tablefmt='pretty', maxcolwidths=[None, columns - 10])
         output.append(table)
 
         if upgrade:
