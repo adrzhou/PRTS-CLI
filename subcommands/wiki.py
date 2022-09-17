@@ -15,7 +15,7 @@ data_path = package_path.joinpath('data')
 @click.option('-t', '--talent', 'talent', is_flag=True, help='查询干员天赋')
 @click.option('-p', '--potential', 'potential', is_flag=True, help='查询干员潜能')
 @click.option('-s', '--skill', 'skill', is_flag=False, flag_value=0, multiple=True, type=int, help='查询干员技能')
-@click.option('-r', '--rank', 'rank', default=[0], multiple=True, type=int, help='查询特定等级的技能')
+@click.option('-r', '--rank', 'rank', default=(0,), multiple=True, type=int, help='查询特定等级的技能')
 @click.option('-u', '--upgrade', 'upgrade', flag_value='upgrade', help='显示技能升级/精英化所需材料')
 @click.option('-U', '--upgrade-only', 'upgrade', flag_value='upgrade_only', help='仅显示技能升级/精英化所需材料')
 @click.option('-e', '--elite', 'elite', type=click.IntRange(0, 2),
@@ -292,10 +292,12 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
             output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
 
         if upgrade:
+            if 0 in rank:
+                rank = range(2, 8)
             if upgrade == 'upgrade_only':
                 output.clear()
             for rk in set(rank).intersection(set(range(2, 8))):
-                req = oprt['技能升级材料'][str(rank)]
+                req = oprt['技能升级材料'][str(rk)]
                 rows = [[k, v] for k, v in req.items()]
                 table = tabulate(rows, tablefmt='github')
                 table = colorize(table)
