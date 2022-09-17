@@ -93,9 +93,56 @@ def plan(args, synth, optimal, up, inventory, compact, clear):
             tomli_w.dump(profile, pro_file)
         return
 
+    if optimal:
+        agg = {}
+        for name, tracker in profile['tracker'].items():
+            oprt = load_oprt(name)
+            focused = ('等级6', '等级7', '技能8', '技能9', '技能10',
+                       '阶段1', '阶段2', '阶段3', '精2')
+            skills = collect(tracker, oprt)
+            skills = {f'{name}.{k}': v for k, v in skills.items() if k.endswith(focused)}
+            agg.update(skills)
+
+        if config['drop_rate_up']:
+            upped = config['drop_rate_up'].keys()
+            comp_agg = compress(agg)
+            convert(comp_agg, profile)
+            comp_agg = {k: v for k, v in comp_agg.items() if k in upped}
+            header = [f'材料', '总需', '库存', '还需']
+            rows = []
+            for mtrl, amount in comp_agg.items():
+                need = amount
+                have = profile['inventory'][mtrl]['amount']
+                farm = max(need - have, 0)
+                rows.append([mtrl, need, have, farm])
+            table = tabulate(rows, headers=header, tablefmt='presto')
+            table = colorize(table)
+            click.echo(f'{table}\n')
+
+        diffs = {}
+        for k, v in agg.items():
+            convert(v, profile)
+            diffs[k] = diff(v, profile, config)
+
+        def get_diff(k):
+            return diffs[k]
+
+        ascending = {k: agg[k] for k in sorted(agg.keys(), key=get_diff)}
+        for skill, recipe in ascending.items():
+            header = [skill, '总需', '库存', '还需']
+            rows = []
+            for mtrl in recipe:
+                need = recipe[mtrl]
+                have = profile['inventory'][mtrl]['amount']
+                farm = max(need - have, 0)
+                rows.append([mtrl, need, have, farm])
+            table = tabulate(rows, headers=header, tablefmt='presto')
+            table = colorize(table)
+            click.echo(f'{table}\n')
+        return
+
     for name, tracker in profile['tracker'].items():
         oprt = load_oprt(name)
-
         skills = collect(tracker, oprt)
         if compact:
             skills = compress(skills)
@@ -192,3 +239,15 @@ def convert(skill: dict, profile: dict):
                 else:
                     skill[k] = v * need
             del skill[mtrl]
+
+
+def diff(skill: dict, profile: dict, config: dict):
+    need = 0
+    for mtrl, amount in skill.items():
+        if profile['inventory'][mtrl]['rarity'] < 3:
+            continue
+        if mtrl in config['drop_rate_up']:
+            continue
+        have = profile['inventory'][mtrl]['amount']
+        need += max(0, amount - have)
+    return need
