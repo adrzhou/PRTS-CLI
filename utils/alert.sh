@@ -1,0 +1,1 @@
+termux-notification -c 'PRTS: 理智已回满' --sound
