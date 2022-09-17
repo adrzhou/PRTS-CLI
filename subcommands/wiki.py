@@ -91,7 +91,7 @@ def tabulate_general(oprt: dict):
     general = []
     for key, value in oprt['干员信息'].items():
         general.append([key, value])
-    return tabulate(general, tablefmt='presto', maxcolwidths=[None, columns - 10])
+    return tabulate(general, tablefmt='presto', maxcolwidths=[None, columns - 12])
 
 
 def tabulate_attr(oprt: dict):
@@ -141,7 +141,7 @@ def tabulate_talent(oprt: dict):
 
     for t, rows in talents.items():
         header = ['条件', '效果']
-        table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, columns - 10])
+        table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, columns - 12])
         output.append(f'{t}\n{table}')
 
     return '\n\n'.join(output)
@@ -333,7 +333,7 @@ def tabulate_module(oprt: dict, upgrade: str):
         rows = []
         for key in ('名称', '类型', '任务1', '任务2'):
             rows.append([key, mdl.pop(key)])
-        table = tabulate(rows, tablefmt='pretty', maxcolwidths=[None, columns - 10])
+        table = tabulate(rows, tablefmt='pretty', maxcolwidths=[None, columns - 12])
         output.append(table)
 
         attrs = [key for key, value in mdl.items() if type(value) is int]
@@ -348,7 +348,7 @@ def tabulate_module(oprt: dict, upgrade: str):
 
         keys = [key for key in mdl if not key.startswith('材料消耗')]
         rows = [[key, mdl.pop(key)] for key in keys]
-        table = tabulate(rows, tablefmt='pretty', maxcolwidths=[None, columns - 10])
+        table = tabulate(rows, tablefmt='pretty', maxcolwidths=[None, columns - 12])
         output.append(table)
 
         if upgrade:
