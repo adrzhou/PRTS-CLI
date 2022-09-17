@@ -141,7 +141,7 @@ def tabulate_talent(oprt: dict):
 
     for t, rows in talents.items():
         header = ['条件', '效果']
-        table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, columns - 12])
+        table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[8, columns - 12])
         output.append(f'{t}\n{table}')
 
     return '\n\n'.join(output)
@@ -183,7 +183,7 @@ def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
             effect = talent[f'{key[:-2]}效果']
             row = [key[:4], value, effect]
             rows.append(row)
-    talent_table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, None, columns - 20])
+    talent_table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=[None, None, columns - 32])
 
     if upgrade:
         upgrade_table = ''
