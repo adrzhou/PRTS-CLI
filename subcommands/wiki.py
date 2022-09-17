@@ -91,7 +91,7 @@ def tabulate_general(oprt: dict):
     general = []
     for key, value in oprt['干员信息'].items():
         general.append([key, value])
-    return tabulate(general, tablefmt='pretty', maxcolwidths=[None, columns - 12])
+    return tabulate(general, tablefmt='presto', maxcolwidths=[None, columns - 15])
 
 
 def tabulate_attr(oprt: dict):
