@@ -223,21 +223,17 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                 name = sk['技能名']
                 type1 = sk['技能类型1']
                 type2 = sk['技能类型2']
-                header = ['等级', '描述', '初始', '消耗', '持续']
+                header = ['等级', '初始', '消耗', '持续']
                 rows = []
-                value = sk['7']
-                row = [value[k] for k in header[1:]]
-                row = [7] + row
-                rows.append(row)
+                value, rank = sk['7'], 7
                 if rarity > 3:
-                    rows.clear()
-                    value = sk['10']
-                    row = [value[k] for k in header[1:]]
-                    row = [10] + row
-                    rows.append(row)
-                table = tabulate(rows, headers=header, tablefmt='presto',
-                                 maxcolwidths=[None, columns - 30, None, None, None])
-                output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
+                    value, rank = sk['10'], 10
+                row = [value[k] for k in header[1:]]
+                row = [rank] + row
+                rows.append(row)
+                table = tabulate(rows, headers=header, tablefmt='presto')
+                desc = value['描述']
+                output.append(f'{name}  [{type1}]  [{type2}]\n{table}\n描述: {desc}')
             except KeyError:
                 continue
 
@@ -266,25 +262,24 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
             name = sk['技能名']
             type1 = sk['技能类型1']
             type2 = sk['技能类型2']
-            header = ['等级', '描述', '初始', '消耗', '持续']
+            header = ['等级', '初始', '消耗', '持续']
             rows = []
 
             # If user does not specify rank
             if 0 in rank:
-                for rk in range(1, 8):
-                    value = sk[str(rk)]
-                    row = [value[k] for k in header[1:]]
-                    row = [rk] + row
-                    rows.append(row)
+                value, rk = sk['7'], 7
                 if rarity > 3:
-                    for rk in (8, 9, 10):
-                        value = sk[str(rk)]
-                        row = [value[k] for k in header[1:]]
-                        row = [rk] + row
-                        rows.append(row)
+                    value, rk = sk['10'], 10
+                row = [value[k] for k in header[1:]]
+                row = [rk] + row
+                rows.append(row)
+                table = tabulate(rows, headers=header, tablefmt='github')
+                desc = value['描述']
+                output.append(f'{name}  [{type1}]  [{type2}]\n{table}\n描述: {desc}')
 
             # If user does specify rank
             else:
+                rank_table = f'{name}  [{type1}]  [{type2}]\n'
                 for rk in set(rank).intersection(set(range(1, 11))):
                     if rk < 1:
                         continue
@@ -298,9 +293,11 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                     row = [value[k] for k in header[1:]]
                     row = [rk] + row
                     rows.append(row)
-
-            table = tabulate(rows, headers=header, tablefmt='github')
-            output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
+                    table = tabulate(rows, headers=header, tablefmt='github')
+                    rows.clear()
+                    desc = value['描述']
+                    rank_table += f'{table}\n描述: {desc}\n\n'
+                output.append(rank_table)
 
         if upgrade:
             if 0 in rank:
