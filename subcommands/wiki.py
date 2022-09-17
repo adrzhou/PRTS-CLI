@@ -222,7 +222,7 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                 sk = oprt[f'{sk}技能']
                 name = sk['技能名']
                 type1 = sk['技能类型1']
-                type2 = sk['技能类型2']
+                type2 = sk.get('技能类型2', '被动触发')
                 header = ['等级', '初始', '消耗', '持续']
                 rows = []
                 value, rank = sk['7'], 7
@@ -261,7 +261,7 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
 
             name = sk['技能名']
             type1 = sk['技能类型1']
-            type2 = sk['技能类型2']
+            type2 = sk.get('技能类型2', '被动触发')
             header = ['等级', '初始', '消耗', '持续']
             rows = []
 
