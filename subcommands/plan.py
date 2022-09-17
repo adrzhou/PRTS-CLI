@@ -5,6 +5,7 @@ import pathlib
 from tabulate import tabulate
 from utils.loader import load_oprt
 from utils.formulae import formulae
+from utils.colorize import colorize
 
 package_path = pathlib.Path(__file__).parents[1]
 config_path = package_path.joinpath('usr', 'config.toml')
@@ -23,8 +24,10 @@ exclude = ('龙门币', '技巧概要·卷1', '技巧概要·卷2', '技巧概�
 @click.option('-o', '--optimal', 'optimal', is_flag=True,
               help='将待升级项目按材料收集进度排序')
 @click.option('-u', '--up', 'up', is_flag=True, help='设定当期活动概率UP的材料')
+@click.option('--clear', 'clear', is_flag=True, help='重置当期活动概率UP的材料')
 @click.option('-i', '--inventory', 'inventory', is_flag=True, help='查询或更新仓库内材料数量')
-def plan(args, synth, optimal, up, inventory):
+@click.option('-c', '--compact', 'compact', is_flag=True, help='将单个干员的所有项目合并')
+def plan(args, synth, optimal, up, inventory, compact, clear):
     """查询干员升级所需材料"""
 
     with open(config_path, 'rb') as config_file:
@@ -33,6 +36,11 @@ def plan(args, synth, optimal, up, inventory):
         profile = tomli.load(pro_file)
 
     if up:
+        if clear:
+            config['drop_rate_up'].clear()
+            with open(config_path, 'wb') as config_file:
+                tomli_w.dump(config, config_file)
+            return
         if not args:
             for skill in config['drop_rate_up']:
                 click.echo(skill)
@@ -85,57 +93,84 @@ def plan(args, synth, optimal, up, inventory):
             tomli_w.dump(profile, pro_file)
         return
 
-    summary = {}
-    for oprt, tracker in profile['tracker'].items():
-        cur_op = summary[oprt] = {}
-        status = tracker['目前']
-        goal = tracker['目标']
-        op_dict = load_oprt(oprt)
-        set_need(cur_op, status, goal, op_dict)
+    for name, tracker in profile['tracker'].items():
+        oprt = load_oprt(name)
 
-        for skill, req in cur_op.items():
-            if not req:
-                continue
+        skills = collect(tracker, oprt)
+        if compact:
+            skills = compress(skills)
             if synth:
-                decompose(req, profile)
-            header = [f'{oprt}.{skill}', '总需', '库存', '还需']
+                convert(skills, profile)
+            header = [f'{name}', '总需', '库存', '还需']
             rows = []
-            for mtrl in req:
-                need = req[mtrl]
+            for mtrl, amount in skills.items():
+                need = amount
                 have = profile['inventory'][mtrl]['amount']
                 farm = max(need - have, 0)
                 rows.append([mtrl, need, have, farm])
-            click.echo(tabulate(rows, headers=header, tablefmt='github'))
-            click.echo('\n')
+            table = tabulate(rows, headers=header, tablefmt='presto')
+            table = colorize(table)
+            click.echo(f'{table}\n')
+        else:
+            for skill, recipe in skills.items():
+                if not recipe:
+                    continue
+                if synth:
+                    convert(recipe, profile)
+                header = [f'{name}\n{skill}', '总需', '库存', '还需']
+                rows = []
+                for mtrl in recipe:
+                    need = recipe[mtrl]
+                    have = profile['inventory'][mtrl]['amount']
+                    farm = max(need - have, 0)
+                    rows.append([mtrl, need, have, farm])
+                table = tabulate(rows, headers=header, tablefmt='presto')
+                table = colorize(table)
+                click.echo(f'{table}\n')
 
 
-def set_need(cur_op: dict, status: dict, goal: dict, op_dict: dict):
+def collect(tracker: dict, oprt: dict):
+    status = tracker['目前']
+    goal = tracker['目标']
+    entries = {}
+
     for skill, level in status.items():
         while level < goal[skill]:
             level += 1
-            key, value = '', {}
             if skill == '精英':
                 key = f'精{level}'
-                value = op_dict['精英化材料'][key]
+                value = oprt['精英化材料'][key]
             elif skill.endswith('技能'):
                 if level <= 7:
-                    key = f'技能升级材料{level}'
-                    value = op_dict['技能升级材料'][str(level)]
+                    key = f'技能等级{level}'
+                    value = oprt['技能升级材料'][str(level)]
                 else:
                     key = f'{skill[0]}技能{level}'
-                    value = op_dict['技能升级材料'][f'{skill[0]}{level}']
-            elif skill == '模组':
-                key = f'模组阶段{level}'
+                    value = oprt['技能升级材料'][f'{skill[0]}{level}']
+            else:
+                key = f'{skill}.阶段{level}'
                 if level == 1:
-                    value = op_dict['模组']['材料消耗']
+                    value = oprt['模组'][skill]['材料消耗']
                 else:
-                    value = op_dict['模组'][f'材料消耗{level}']
-            cur_op[key] = {k: v for k, v in value.items()
-                           if k not in exclude
-                           and not k.endswith('芯片')}
+                    value = oprt['模组'][skill][f'材料消耗{level}']
+            entries[key] = {k: v for k, v in value.items()
+                            if k not in exclude
+                            and not k.endswith('芯片')}
+    return entries
 
 
-def decompose(skill: dict, profile: dict):
+def compress(skills: dict):
+    agg = {}
+    for recipe in skills.values():
+        for mtrl, amount in recipe.items():
+            if mtrl not in agg:
+                agg[mtrl] = amount
+            else:
+                agg[mtrl] += amount
+    return agg
+
+
+def convert(skill: dict, profile: dict):
     # 金色材料分解为银色材料
     for mtrl in tuple(skill.keys()):
         if int(profile['inventory'][mtrl]['rarity']) > 4:
