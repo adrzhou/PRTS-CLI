@@ -12,7 +12,7 @@ job_path = package_path.joinpath('usr', 'job.toml')
 @click.command(no_args_is_help=True)
 @click.argument('sanity', nargs=1, required=False)
 @click.option('-m', '--max', 'max_', type=int, help='设定理智上限')
-def alert(sanity, max_):
+def remind(sanity, max_):
     with open(job_path, 'rb') as job_file:
         job = tomli.load(job_file)
 
@@ -23,7 +23,7 @@ def alert(sanity, max_):
         job['max_sanity'] = max_
     if 'max_sanity' not in job:
         max_ = click.prompt('请设定理智上限: ')
-        alert(sanity, max_)
+        remind(sanity, max_)
     else:
         max_ = job['max_sanity']
     if diff := sanity - max_ > 0:
