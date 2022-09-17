@@ -41,7 +41,7 @@ def wiki(pager, general, attr, talent, potential, skill, rank, upgrade, elite, m
     output = []
 
     # If user only provides the operator argument
-    everything = not (general or attr or talent or skill
+    everything = not (general or attr or talent or skill or potential
                       or (elite in range(3))
                       or module)
     if everything:
@@ -204,7 +204,7 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
     if 0 in skill:
         if rarity < 3:
             click.echo('一星和二星干员无技能')
-            return
+            return ''
 
         output = []
         for sk in kanji.values():
