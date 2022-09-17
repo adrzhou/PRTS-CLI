@@ -236,7 +236,7 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                     row = [10] + row
                     rows.append(row)
                 table = tabulate(rows, headers=header, tablefmt='presto',
-                                 maxcolwidths=[None, columns - 20, None, None, None])
+                                 maxcolwidths=[None, columns - 30, None, None, None])
                 output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
             except KeyError:
                 continue
