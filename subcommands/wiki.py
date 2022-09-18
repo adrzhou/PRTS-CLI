@@ -142,7 +142,7 @@ def tabulate_talent(oprt: dict):
 
     for t, rows in talents.items():
         header = ['条件', '效果']
-        table = tabulate(rows, headers=header, tablefmt='psql', maxcolwidths=[8, columns - 12])
+        table = tabulate(rows, headers=header, tablefmt='psql', maxcolwidths=[8, columns - 14])
         output.append(f'{t}\n{table}')
 
     return '\n\n'.join(output)
