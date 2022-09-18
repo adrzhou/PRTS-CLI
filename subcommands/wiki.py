@@ -1,6 +1,7 @@
 import click
 import pathlib
 from tabulate import tabulate
+from os import get_terminal_size as t_size
 from utils.loader import load_oprt
 from utils.colorize import colorize
 
@@ -87,7 +88,7 @@ def tabulate_general(oprt: dict):
     general = []
     for key, value in oprt['干员信息'].items():
         general.append([key, value])
-    return tabulate(general, tablefmt='pretty')
+    return tabulate(general, tablefmt='psql', maxcolwidths=[None, t_size().columns - 16])
 
 
 def tabulate_attr(oprt: dict):
@@ -95,7 +96,7 @@ def tabulate_attr(oprt: dict):
     for key in ('再部署', '部署费用', '阻挡数', '攻击速度'):
         value = oprt['属性'][key]
         attr1.append([key, value])
-    attr1 = tabulate(attr1, tablefmt='pretty')
+    attr1 = tabulate(attr1, tablefmt='psql')
 
     attr2 = []
     attr2_header = ['属性', '精英0 1级', '精英0 满级', '信赖加成']
@@ -131,7 +132,7 @@ def tabulate_talent(oprt: dict):
 
     for t, rows in talents.items():
         header = ['条件', '效果']
-        table = tabulate(rows, headers=header, tablefmt='github')
+        table = tabulate(rows, headers=header, tablefmt='psql', maxcolwidths=[None, t_size().columns - 18])
         output.append(f'{t}\n{table}')
 
     return '\n\n'.join(output)
@@ -173,7 +174,7 @@ def tabulate_elite(oprt: dict, elite: int, upgrade: bool):
             effect = talent[f'{key[:-2]}效果']
             row = [key[:4], value, effect]
             rows.append(row)
-    talent_table = tabulate(rows, headers=header, tablefmt='github')
+    talent_table = tabulate(rows, headers=header, tablefmt='psql', maxcolwidths=[None, None, t_size().columns - 30])
 
     if upgrade:
         upgrade_table = ''
@@ -225,7 +226,8 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                     row = [value[k] for k in header[1:]]
                     row = [10] + row
                     rows.append(row)
-                table = tabulate(rows, headers=header, tablefmt='github')
+                mcw = [None, t_size().columns - 38, None, None, None]
+                table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=mcw)
                 output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
             except KeyError:
                 continue
@@ -287,8 +289,8 @@ def tabulate_skill(oprt: dict, skill: tuple, rank: tuple, upgrade: str):
                     row = [value[k] for k in header[1:]]
                     row = [rk] + row
                     rows.append(row)
-
-            table = tabulate(rows, headers=header, tablefmt='github')
+            mcw = [None, t_size().columns - 38, None, None, None]
+            table = tabulate(rows, headers=header, tablefmt='presto', maxcolwidths=mcw)
             output.append(f'{name}  [{type1}]  [{type2}]\n{table}')
 
         if upgrade:
@@ -322,7 +324,7 @@ def tabulate_module(oprt: dict, upgrade: str):
         rows = []
         for key in ('名称', '类型', '任务1', '任务2'):
             rows.append([key, mdl.pop(key)])
-        table = tabulate(rows, tablefmt='pretty')
+        table = tabulate(rows, tablefmt='psql', maxcolwidths=[None, t_size().columns - 12])
         output.append(table)
 
         attrs = [key for key, value in mdl.items() if type(value) is int]
@@ -332,12 +334,12 @@ def tabulate_module(oprt: dict, upgrade: str):
         cols['等级1'] = [mdl.pop(key, None) for key in keys]
         cols['等级2'] = [mdl.pop(f'{key}2', None) for key in keys]
         cols['等级3'] = [mdl.pop(f'{key}3', None) for key in keys]
-        table = tabulate(cols, headers='keys', tablefmt='pretty')
+        table = tabulate(cols, headers='keys', tablefmt='presto')
         output.append(table)
 
         keys = [key for key in mdl if not key.startswith('材料消耗')]
         rows = [[key, mdl.pop(key)] for key in keys]
-        table = tabulate(rows, tablefmt='pretty')
+        table = tabulate(rows, tablefmt='psql', maxcolwidths=[None, t_size().columns - 12])
         output.append(table)
 
         if upgrade:
@@ -346,7 +348,7 @@ def tabulate_module(oprt: dict, upgrade: str):
             for key, req in mdl.items():
                 header = ('材料', '数量')
                 rows = [[k, v] for k, v in req.items()]
-                table = tabulate(rows, headers=header, tablefmt='pretty')
+                table = tabulate(rows, headers=header, tablefmt='github')
                 table = colorize(table)
                 output.append(f'{key}\n{table}')
 
