@@ -13,6 +13,8 @@ job_path = package_path.joinpath('usr', 'job.toml')
 @click.argument('sanity', nargs=1, type=int, required=False)
 @click.option('-m', '--max', 'max_', type=int, help='设定理智上限')
 def remind(sanity, max_):
+    """设定理智回满通知"""
+
     with open(job_path, 'rb') as job_file:
         job = tomli.load(job_file)
 
