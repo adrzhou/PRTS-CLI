@@ -54,17 +54,17 @@ def track(operator, elite, rank, skill, module, goal):
         else:
             tracker = profile['tracker'][name]
 
-        if elite in range(3):
+        if type(elite) is int:
             set_elite(goal, elite, rarity, name, tracker)
         if rank:
             set_rank(goal, rank, skill, rarity, name, tracker)
-        if module:
+        if type(module) is int:
             set_module(goal, module, name, tracker)
 
         status = tracker['目前']
-        goal = tracker['目标']
+        target = tracker['目标']
         header = [name, '目前', '目标']
-        rows = [[key, status[key], goal[key]] for key in status]
+        rows = [[key, status[key], target[key]] for key in status]
         table = tabulate(rows, headers=header, tablefmt='github')
         click.echo(table)
         click.echo('\n')
@@ -138,17 +138,15 @@ def set_elite(goal: bool, elite: int, rarity: int, name: str, tracker: dict) -> 
             for k, v in tracker['目标'].items():
                 if k.endswith('技能') and v > 4:
                     tracker['目标'][k] = 4
-            if '模组' in tracker:
-                for mdl in tracker['模组'].values():
-                    tracker['目标'][mdl] = 0
+            for mdl in tracker['模组'].values():
+                tracker['目标'][mdl] = 0
         # 精英1的干员技能等级不大于7且未解锁模组
         elif elite == 1:
             for k, v in tracker['目标'].items():
                 if k.endswith('技能') and v > 7:
                     tracker['目标'][k] = 7
-            if '模组' in tracker:
-                for mdl in tracker['模组'].values():
-                    tracker['目标'][mdl] = 0
+            for mdl in tracker['模组'].values():
+                tracker['目标'][mdl] = 0
         return
 
     tracker['目前']['精英'] = elite
@@ -157,15 +155,15 @@ def set_elite(goal: bool, elite: int, rarity: int, name: str, tracker: dict) -> 
         for k, v in tracker['目前'].items():
             if k.endswith('技能') and v > 4:
                 tracker['目前'][k] = 4
-        if '模组' in tracker['目前'].keys():
-            tracker['目前']['模组'] = 0
+        for mdl in tracker['模组'].values():
+            tracker['目前'][mdl] = 0
     # 精英1的干员技能等级不大于7且未解锁模组
     elif elite == 1:
         for k, v in tracker['目前'].items():
             if k.endswith('技能') and v > 7:
                 tracker['目前'][k] = 7
-        if '模组' in tracker['目前'].keys():
-            tracker['模组'] = 0
+        for mdl in tracker['模组'].values():
+            tracker['目前'][mdl] = 0
 
 
 def set_rank(goal: bool, rank: int, skill: int, rarity: int, name: str, tracker: dict) -> None:
@@ -196,7 +194,7 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, name: str, tracker:
             for k, v in tracker['目前'].items():
                 if k.endswith('技能'):
                     tracker['目前'][k] = rank
-            if rank > 4:
+            if rank > 4 and tracker['目前']['精英'] < 1:
                 tracker['目前']['精英'] = 1
             return
         if goal:
@@ -223,7 +221,7 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, name: str, tracker:
         for k, v in tracker['目前'].items():
             if k.endswith('技能'):
                 tracker['目前'][k] = rank
-        if rank > 4:
+        if rank > 4 and tracker['目前']['精英'] < 1:
             tracker['目前']['精英'] = 1
         if rank > 7:
             tracker['目前']['精英'] = 2
@@ -233,24 +231,27 @@ def set_rank(goal: bool, rank: int, skill: int, rarity: int, name: str, tracker:
 def set_module(goal: bool, module: int, name: str, tracker: dict) -> None:
     """Helper for setting an operator's module phase"""
 
-    if '模组' in tracker:
-        if module not in (0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23):
-            module = click.prompt('模组等级无效 请重新输入: ')
-            set_module(goal, module, name, tracker)
-            return
-        if module > 13 and len(tracker['模组']) == 1:
-            click.echo(f'干员{name}未实装第二模组')
-            return
-        if module < 20:
-            mdl = tracker['模组']['1']
-        else:
-            mdl = tracker['模组']['2']
-        level = module % 10
-        if goal:
-            tracker['目标'][mdl] = level
-            if level in range(1, 4):
-                tracker['目标']['精英'] = 2
-        else:
-            tracker['目前'][mdl] = level
-            if level in range(1, 4):
-                tracker['目前']['精英'] = 2
+    if len(tracker['模组']) == 0:
+        click.echo(f'干员<{name}>未实装模组')
+        return
+    if module not in (0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23):
+        module = click.prompt('模组等级无效 请重新输入')
+        module = int(module)
+        set_module(goal, module, name, tracker)
+        return
+    if module > 13 and len(tracker['模组']) == 1:
+        click.echo(f'干员{name}未实装第二模组')
+        return
+    if module < 20:
+        mdl = tracker['模组']['1']
+    else:
+        mdl = tracker['模组']['2']
+    level = module % 10
+    if goal:
+        tracker['目标'][mdl] = level
+        if level in range(1, 4):
+            tracker['目标']['精英'] = 2
+    else:
+        tracker['目前'][mdl] = level
+        if level in range(1, 4):
+            tracker['目前']['精英'] = 2
