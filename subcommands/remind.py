@@ -37,6 +37,7 @@ def remind(sanity, max_):
             hide = subprocess.getoutput(f'atrm {last_jobid}')
         schedule = subprocess.getoutput(f'at -f utils/alert.sh now +{after} minutes')
         job['last_id'] = schedule.split('\n')[1].split()[1]
+        click.echo(f'PRTS将在{diff // 10}小时后推送通知')
 
     with open(job_path, 'wb') as job_file:
         tomli_w.dump(job, job_file)
