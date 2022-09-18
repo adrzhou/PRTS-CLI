@@ -51,7 +51,7 @@ def sync(subclass, operators):
         with open(names_path, 'rb') as names_file:
             names: dict = tomli.load(names_file)
         for oprt in operators:
-            oprt = config['alias'].get(oprt.upper(), oprt).lower()
+            oprt = config['alias'].get(oprt, oprt).lower()
             source = get_source(oprt)
             if not source:
                 click.echo(f'ERROR: 未找到干员**{oprt}**的wiki页面')
