@@ -77,7 +77,7 @@ def sync(subclass, operators):
             if oprt_subcls not in catalog[oprt_cls]:
                 catalog[oprt_cls][oprt_subcls] = {}
             names[f"{oprt_data['干员信息']['干员名']}"] = stem
-            names[f"{oprt_data['干员信息']['干员外文名']}"] = stem
+            names[f"{oprt_data['干员信息']['干员外文名'].upper()}"] = stem
             catalog[oprt_cls][oprt_subcls][oprt_name] = stem
 
             click.echo(f'成功更新**{oprt_name}**的干员信息')
