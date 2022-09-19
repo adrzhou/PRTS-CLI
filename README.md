@@ -20,10 +20,12 @@ Commands:
 ```
 
 ## 移动端预览
-![preview_harmony_os](https://user-images.githubusercontent.com/101899715/190879877-3f641677-590c-441f-88b3-8857da69dfc3.jpg)
-![preview_mobile](https://user-images.githubusercontent.com/101899715/190879862-011d1d59-20f1-4915-8c29-c22ba4a42b93.jpg)
 
+![preview_mobile](https://user-images.githubusercontent.com/101899715/190935952-35dc52ca-60ae-4c48-9613-d09030a138c3.png)
 
+## PC端预览
+
+![preview_pc](https://user-images.githubusercontent.com/101899715/190935997-9a8ca655-af0b-4b5b-97b7-36a757759d76.png)
 
 ## 安装
 
@@ -134,12 +136,12 @@ $ prts wiki Mizuki -s3 -r10 -U
 追踪干员练度，搭配 `plan` 命令来确认升级所需材料
 
 ```
-# 示例：把晨曦格雷伊和至简加入待养成列表
-$ prts track 晨曦格雷伊 Minimalist
+# 示例：把承曦格雷伊和至简加入待养成列表
+$ prts track 承曦格雷伊 Minimalist
 
 # 输出结果 (实际控制台中的表格会比这里的美观）
 | 承曦格雷伊   |   目前 |   目标 |
-|--------------|--------|--------|
+|-------------|--------|--------|
 | 精英         |      0 |      2 |
 | 一技能       |      1 |      7 |
 | 二技能       |      1 |      7 |
@@ -215,7 +217,8 @@ $ prts remind 30
 
 # prts 将会通过 Termux 在 （133 -30）* 6 = 618 分钟之后提醒您回罗德岛报到
 ```
-![preview_remind](https://user-images.githubusercontent.com/101899715/190879888-93694b93-1bdd-4d4c-a6a4-f4308ad24570.jpg)
+
+![preview_reminder](https://user-images.githubusercontent.com/101899715/190936132-19c15f93-234c-4e02-b38d-366b49e66781.jpg)
 
 
 ## 数据来源
