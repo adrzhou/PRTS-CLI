@@ -25,7 +25,7 @@ Commands:
 
 ## PC端预览
 
-![preview_pc](https://user-images.githubusercontent.com/101899715/190935997-9a8ca655-af0b-4b5b-97b7-36a757759d76.png)
+![terminal_preview](https://user-images.githubusercontent.com/101899715/194989669-51854b59-95f8-4881-b652-f26a32748bdf.png)
 
 ## 安装
 
